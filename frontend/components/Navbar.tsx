@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ShoppingBag, Menu, X, Search, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingBag, Menu, X, Search, User, LogOut, Settings, Package } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_LEFT = [
   { label: "Shop", href: "/shop" },
@@ -17,15 +20,38 @@ const NAV_RIGHT = [
 ];
 
 export default function Navbar() {
+  const router = useRouter();
+  const { user, isLoggedIn, isAdmin, logout } = useAuth();
+
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [cartCount] = useState(0);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const handleLogout = async () => {
+    setUserMenuOpen(false);
+    await logout();
+    toast.success("Sampai jumpa!");
+    router.push("/");
+  };
 
   return (
     <>
@@ -81,13 +107,91 @@ export default function Navbar() {
               >
                 <Search size={16} strokeWidth={1.5} />
               </button>
-              <Link
-                href="/account"
-                aria-label="Account"
-                className="text-[#4A4845] hover:text-[#0A0A0A] transition-colors"
-              >
-                <User size={16} strokeWidth={1.5} />
-              </Link>
+
+              {/* User menu / login */}
+              {isLoggedIn ? (
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen((v) => !v)}
+                    aria-label="Account menu"
+                    className="flex items-center gap-1.5 text-[#4A4845] hover:text-[#0A0A0A] transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-[#0A0A0A] flex items-center justify-center">
+                      <span className="text-[8px] font-bold text-[#F2F0EB] uppercase">
+                        {user?.name?.slice(0, 2) ?? "U"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Dropdown */}
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                        transition={{ duration: 0.18 }}
+                        className="absolute right-0 top-full mt-2 w-52 bg-white border border-[#E8E5DF] rounded-2xl shadow-xl overflow-hidden"
+                      >
+                        {/* User info */}
+                        <div className="px-4 py-3 border-b border-[#E8E5DF]">
+                          <p className="text-xs font-bold text-[#0A0A0A] truncate">{user?.name}</p>
+                          <p className="text-[10px] text-[#8A8680] truncate">{user?.email}</p>
+                        </div>
+
+                        {/* Menu items */}
+                        <div className="py-1">
+                          {isAdmin && (
+                            <Link
+                              href="/admin"
+                              onClick={() => setUserMenuOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-[11px] font-semibold text-[#5C1A1A] hover:bg-[#F2F0EB] transition-colors"
+                            >
+                              <Settings size={13} />
+                              Admin Panel
+                            </Link>
+                          )}
+                          <Link
+                            href="/orders"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-[11px] text-[#4A4845] hover:bg-[#F2F0EB] hover:text-[#0A0A0A] transition-colors"
+                          >
+                            <Package size={13} />
+                            Pesanan Saya
+                          </Link>
+                          <Link
+                            href="/account"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-[11px] text-[#4A4845] hover:bg-[#F2F0EB] hover:text-[#0A0A0A] transition-colors"
+                          >
+                            <User size={13} />
+                            Profil
+                          </Link>
+                        </div>
+
+                        <div className="border-t border-[#E8E5DF] py-1">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-[11px] text-red-500 hover:bg-red-50 transition-colors"
+                          >
+                            <LogOut size={13} />
+                            Logout
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  aria-label="Sign in"
+                  className="text-[#4A4845] hover:text-[#0A0A0A] transition-colors"
+                >
+                  <User size={16} strokeWidth={1.5} />
+                </Link>
+              )}
+
               <Link
                 href="/cart"
                 aria-label="Cart"
@@ -124,7 +228,7 @@ export default function Navbar() {
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-40 bg-[#F2F0EB] pt-14 flex flex-col"
           >
-            <div className="flex flex-col p-8 gap-8">
+            <div className="flex flex-col p-8 gap-8 flex-1">
               {[...NAV_LEFT, ...NAV_RIGHT].map((item, i) => (
                 <motion.div
                   key={item.href}
@@ -143,10 +247,36 @@ export default function Navbar() {
               ))}
 
               <div className="flex items-center gap-6 mt-auto pt-8 border-t border-[#C8C4BC]">
-                <Link href="/account" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 text-sm text-[#4A4845]">
-                  <User size={16} /> Account
-                </Link>
-                <Link href="/cart" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 text-sm text-[#4A4845]">
+                {isLoggedIn ? (
+                  <>
+                    <Link
+                      href="/account"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-sm text-[#4A4845]"
+                    >
+                      <User size={16} /> {user?.name?.split(" ")[0]}
+                    </Link>
+                    <button
+                      onClick={() => { setMenuOpen(false); handleLogout(); }}
+                      className="flex items-center gap-2 text-sm text-red-500"
+                    >
+                      <LogOut size={16} /> Logout
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-sm text-[#4A4845]"
+                  >
+                    <User size={16} /> Sign In
+                  </Link>
+                )}
+                <Link
+                  href="/cart"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 text-sm text-[#4A4845] ml-auto"
+                >
                   <ShoppingBag size={16} /> Cart
                 </Link>
               </div>

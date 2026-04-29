@@ -1,24 +1,27 @@
-import { mergeProps } from "@base-ui/react/merge-props"
-import { useRender } from "@base-ui/react/use-render"
+import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
+import type { OrderStatus } from "@/types"
 
 const badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!",
+  "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm border transition-colors",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
-        secondary:
-          "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
-        destructive:
-          "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
-        outline:
-          "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
-        ghost:
-          "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-[#0A0A0A] text-[#F2F0EB] border-transparent",
+        secondary: "bg-[#E8E5DF] text-[#4A4845] border-transparent",
+        limited: "bg-[#0A0A0A] text-[#C8FF00] border-transparent",
+        sale: "bg-[#5C1A1A] text-white border-transparent",
+        outline: "bg-transparent text-[#0A0A0A] border-[#C8C4BC]",
+        // Order status variants
+        pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+        paid: "bg-blue-50 text-blue-700 border-blue-200",
+        processing: "bg-purple-50 text-purple-700 border-purple-200",
+        shipped: "bg-cyan-50 text-cyan-700 border-cyan-200",
+        completed: "bg-green-50 text-green-700 border-green-200",
+        cancelled: "bg-red-50 text-red-600 border-red-200",
+        admin: "bg-[#0A0A0A] text-[#C8FF00] border-transparent",
+        user: "bg-[#E8E5DF] text-[#4A4845] border-transparent",
       },
     },
     defaultVariants: {
@@ -27,26 +30,42 @@ const badgeVariants = cva(
   }
 )
 
-function Badge({
-  className,
-  variant = "default",
-  render,
-  ...props
-}: useRender.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
-  return useRender({
-    defaultTagName: "span",
-    props: mergeProps<"span">(
-      {
-        className: cn(badgeVariants({ variant }), className),
-      },
-      props
-    ),
-    render,
-    state: {
-      slot: "badge",
-      variant,
-    },
-  })
+interface BadgeProps
+  extends React.HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof badgeVariants> {
+  dot?: boolean
 }
 
-export { Badge, badgeVariants }
+const DOT_COLORS: Partial<Record<string, string>> = {
+  limited: "bg-[#C8FF00] animate-pulse",
+  pending: "bg-yellow-400",
+  paid: "bg-blue-400",
+  processing: "bg-purple-400",
+  shipped: "bg-cyan-400",
+  completed: "bg-green-400",
+  cancelled: "bg-red-400",
+}
+
+function Badge({ className, variant = "default", dot, children, ...props }: BadgeProps) {
+  const dotColor = variant ? DOT_COLORS[variant] : undefined
+
+  return (
+    <span
+      data-slot="badge"
+      className={cn(badgeVariants({ variant }), className)}
+      {...props}
+    >
+      {dot && dotColor && (
+        <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", dotColor)} />
+      )}
+      {children}
+    </span>
+  )
+}
+
+// Helper to get badge variant from order status
+function getStatusBadgeVariant(status: OrderStatus): VariantProps<typeof badgeVariants>["variant"] {
+  return status as VariantProps<typeof badgeVariants>["variant"]
+}
+
+export { Badge, badgeVariants, getStatusBadgeVariant }
