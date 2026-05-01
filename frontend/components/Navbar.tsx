@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ShoppingBag, Menu, X, Search, User, LogOut, Settings, Package } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 
 const NAV_LEFT = [
   { label: "Shop", href: "/shop" },
@@ -26,7 +27,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [cartCount] = useState(0);
+  const { cart, setIsCartOpen } = useCart();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -192,18 +193,18 @@ export default function Navbar() {
                 </Link>
               )}
 
-              <Link
-                href="/cart"
+              <button
+                onClick={() => setIsCartOpen(true)}
                 aria-label="Cart"
                 className="relative text-[#4A4845] hover:text-[#0A0A0A] transition-colors"
               >
                 <ShoppingBag size={16} strokeWidth={1.5} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-[#0A0A0A] text-[#F2F0EB] text-[8px] font-bold rounded-full flex items-center justify-center">
-                    {cartCount}
+                {cart && cart.total_items > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-[#5C1A1A] text-[#F2F0EB] text-[8px] font-bold rounded-full flex items-center justify-center">
+                    {cart.total_items}
                   </span>
                 )}
-              </Link>
+              </button>
             </div>
           </div>
 

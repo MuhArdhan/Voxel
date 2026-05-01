@@ -105,14 +105,10 @@ export interface CartItem {
 }
 
 export interface Cart {
-  id: number;
-  user_id?: number;
-  session_id?: string;
+  cart_id: number;
   items: CartItem[];
-  total_price: number;
-  items_count: number;
-  created_at: string;
-  updated_at: string;
+  total: number;
+  total_items: number;
 }
 
 // ----- Order -----

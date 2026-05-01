@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { useProducts } from "@/hooks/useProducts";
 import ProductCard from "@/components/ProductCard";
 import { ProductCardSkeleton, Skeleton } from "@/components/ui/skeleton";
+import { useCart } from "@/contexts/CartContext";
 
 // Animated price
 function PriceDisplay({ price }: { price: number }) {
@@ -41,6 +42,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+  const { addItem, setIsCartOpen } = useCart();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,14 +79,24 @@ export default function ProductDetailPage() {
   const isOutOfStock = product?.variants.every((v) => v.stock === 0);
 
   const handleAddToCart = async () => {
-    if (!selectedSize) { toast.error("Pilih ukuran dulu."); return; }
-    if (quantity > availableStock) { toast.error("Stok tidak mencukupi."); return; }
+    if (!product) return;
+    if (!selectedSize || !selectedVariant) { 
+      toast.error("Pilih ukuran dulu."); 
+      return; 
+    }
+    if (quantity > availableStock) { 
+      toast.error("Stok tidak mencukupi."); 
+      return; 
+    }
+    
     setIsAdding(true);
     try {
-      await new Promise((r) => setTimeout(r, 800));
-      setAddedFlash(true);
-      setTimeout(() => setAddedFlash(false), 1000);
-      toast.success(`${product?.name} (${selectedSize}) masuk keranjang!`);
+      const success = await addItem(product.id, selectedVariant.id, quantity);
+      if (success) {
+        setAddedFlash(true);
+        setTimeout(() => setAddedFlash(false), 1000);
+        setIsCartOpen(true);
+      }
     } catch {
       toast.error("Gagal menambahkan ke keranjang.");
     } finally {

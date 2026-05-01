@@ -1,14 +1,18 @@
 "use client";
 
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
+import CartSlideOver from "@/components/CartSlideOver";
 import { Toaster } from "@/components/ui/sonner";
 import type { ReactNode } from "react";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
-      {children}
-      <Toaster
+      <CartProvider>
+        {children}
+        <CartSlideOver />
+        <Toaster
         position="bottom-right"
         toastOptions={{
           classNames: {
@@ -22,6 +26,7 @@ export function Providers({ children }: { children: ReactNode }) {
           },
         }}
       />
+      </CartProvider>
     </AuthProvider>
   );
 }
