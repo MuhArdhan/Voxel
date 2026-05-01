@@ -14,12 +14,38 @@ class CartController extends Controller
 {
     private function getCart(Request $request): Cart
     {
-        if ($request->user()) {
-            return Cart::firstOrCreate(['user_id' => $request->user()->id]);
+        $sessionId = $request->header('X-Session-ID') ?? session()->getId();
+
+        $user = $request->user('sanctum');
+
+        if ($user) {
+            $userCart = Cart::firstOrCreate(['user_id' => $user->id]);
+
+            // If there's a guest cart with this session ID, move its items to the user cart
+            if ($sessionId) {
+                $guestCart = Cart::where('session_id', $sessionId)->whereNull('user_id')->first();
+                if ($guestCart && $guestCart->id !== $userCart->id) {
+                    foreach ($guestCart->items as $item) {
+                        // Check if item already exists in user cart
+                        $existingItem = $userCart->items()
+                            ->where('product_id', $item->product_id)
+                            ->where('product_variant_id', $item->product_variant_id)
+                            ->first();
+
+                        if ($existingItem) {
+                            $existingItem->update(['quantity' => $existingItem->quantity + $item->quantity]);
+                        } else {
+                            $item->update(['cart_id' => $userCart->id]);
+                        }
+                    }
+                    $guestCart->delete(); // Remove abandoned guest cart
+                }
+            }
+
+            return $userCart;
         }
 
         // Guest cart
-        $sessionId = $request->header('X-Session-ID') ?? session()->getId();
         return Cart::firstOrCreate(['session_id' => $sessionId, 'user_id' => null]);
     }
 

@@ -2,6 +2,8 @@
 // VOXEL Frontend — TypeScript Interfaces
 // ============================================================
 
+import { z } from "zod";
+
 // ----- User -----
 export interface User {
   id: number;
@@ -178,6 +180,18 @@ export interface CheckoutPayload {
   shipping_cost: number;
   notes?: string;
 }
+
+export const checkoutSchema = z.object({
+  shipping_name: z.string().min(3, "Nama lengkap harus diisi (min 3 karakter)"),
+  shipping_phone: z.string().min(10, "Nomor HP tidak valid").regex(/^[0-9+]+$/, "Hanya angka yang diperbolehkan"),
+  shipping_address: z.string().min(10, "Alamat lengkap harus diisi secara detail"),
+  shipping_city: z.string().min(3, "Kota harus diisi"),
+  shipping_province: z.string().min(3, "Provinsi harus diisi"),
+  shipping_postal_code: z.string().min(4, "Kode pos tidak valid"),
+  notes: z.string().optional(),
+});
+
+export type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 // ----- Product Filters -----
 export interface ProductFilters {
