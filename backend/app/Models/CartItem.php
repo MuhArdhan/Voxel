@@ -18,6 +18,8 @@ class CartItem extends Model
         'quantity' => 'integer',
     ];
 
+    protected $appends = ['subtotal'];
+
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
