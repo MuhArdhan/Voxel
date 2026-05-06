@@ -77,7 +77,16 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json($request->user());
+        $user = $request->user();
+
+        // Append stats for account dashboard
+        $totalOrders = $user->orders()->where('status', 'completed')->count();
+        $totalSpent = $user->orders()->where('status', 'completed')->sum('total_price');
+
+        $user->total_orders = $totalOrders;
+        $user->total_spent = $totalSpent;
+
+        return response()->json($user);
     }
 
     public function updateProfile(Request $request): JsonResponse
