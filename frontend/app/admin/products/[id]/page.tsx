@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { apiGet, apiPut, apiPost, apiDelete } from "@/lib/api";
+import { apiGet, apiPut, apiPost, apiDelete, API_BASE_URL, STORAGE_URL } from "@/lib/api";
 import { type Product, type Category, type ProductVariant, type ProductImage } from "@/types";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -114,7 +114,7 @@ export default function EditProductPage() {
 
     try {
       const token = localStorage.getItem('voxel_token');
-      const res = await fetch(`http://localhost:8000/api/admin/products/${id}/images`, {
+      const res = await fetch(`${API_BASE_URL}/admin/products/${id}/images`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -366,7 +366,7 @@ export default function EditProductPage() {
             <div className="grid grid-cols-2 gap-4 mb-6">
               {product.images.map((img) => (
                 <div key={img.id} className={`relative group aspect-square rounded-xl overflow-hidden border-2 ${img.is_primary ? 'border-[#00D4FF]' : 'border-[#C8C4BC]'}`}>
-                  <img src={`http://localhost:8000/storage/${img.image_path}`} alt="Product" className="w-full h-full object-cover" />
+                  <img src={`${STORAGE_URL}/${img.image_path}`} alt="Product" className="w-full h-full object-cover" />
                   
                   {img.is_primary && (
                     <div className="absolute top-2 left-2 bg-[#00D4FF] text-[#0A0A0A] text-[9px] font-bold uppercase px-2 py-0.5 rounded shadow">

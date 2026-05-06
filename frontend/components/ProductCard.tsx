@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ShoppingBag, Eye } from "lucide-react";
+import { STORAGE_URL } from "@/lib/api";
 
 interface Product {
   id: number;
@@ -39,6 +40,7 @@ export default function ProductCard({ product, index = 0, size = "default" }: Pr
     .map((v) => v.size);
   const effectivePrice = product.discount_price ?? product.price;
   const hasDiscount = !!product.discount_price;
+  const primaryImage = product.images?.find((img) => img.is_primary) || product.images?.[0];
 
   return (
     <motion.div
@@ -57,10 +59,17 @@ export default function ProductCard({ product, index = 0, size = "default" }: Pr
             size === "large" ? "aspect-[3/4]" : size === "small" ? "aspect-square" : "aspect-[4/5]"
           }`}
         >
-          {/* Product image placeholder */}
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#E8E5DF] to-[#D4D0C8]">
-            <span className="text-5xl opacity-20">👕</span>
-          </div>
+          {primaryImage ? (
+            <img 
+              src={`${STORAGE_URL}/${primaryImage.image_path}`} 
+              alt={product.name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#E8E5DF] to-[#D4D0C8]">
+              <span className="text-5xl opacity-20">👕</span>
+            </div>
+          )}
 
           {/* Neon corner accents on hover */}
           <motion.div
