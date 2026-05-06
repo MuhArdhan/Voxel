@@ -13,7 +13,7 @@ class AdminDashboardController extends Controller
 {
     public function stats(): JsonResponse
     {
-        $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total_price');
+        $totalRevenue = Order::where('status', 'completed')->sum('total_price');
         $totalOrders = Order::count();
         $totalUsers = User::where('role', 'user')->count();
         $totalProducts = Product::count();
@@ -28,7 +28,7 @@ class AdminDashboardController extends Controller
             ->pluck('count', 'status');
 
         // Revenue last 7 days
-        $revenueChart = Order::where('status', '!=', 'cancelled')
+        $revenueChart = Order::where('status', 'completed')
             ->where('created_at', '>=', now()->subDays(7))
             ->selectRaw('DATE(created_at) as date, SUM(total_price) as revenue')
             ->groupBy('date')
