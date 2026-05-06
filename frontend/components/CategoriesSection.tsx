@@ -22,7 +22,14 @@ const containerVariants = {
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      duration: 0.6, 
+      ease: [0.22, 1, 0.36, 1] as any 
+    } 
+  },
 };
 
 export default function CategoriesSection() {
@@ -63,8 +70,7 @@ export default function CategoriesSection() {
         <motion.div
           variants={containerVariants}
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+          animate={!isLoading && displayCategories.length > 0 ? "visible" : "hidden"}
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3"
         >
           {isLoading ? (

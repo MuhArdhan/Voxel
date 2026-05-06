@@ -15,7 +15,7 @@ class OrderController extends Controller
     {
         $orders = $request->user()
             ->orders()
-            ->with('items')
+            ->with(['items.product.images'])
             ->latest()
             ->paginate(10);
 
@@ -24,8 +24,14 @@ class OrderController extends Controller
 
     public function show(Request $request, Order $order): JsonResponse
     {
-        abort_if($order->user_id !== $request->user()->id, 403);
-        $order->load('items');
+        // Check if order belongs to current user
+        if ($order->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Order not found or you do not have permission to view this order'
+            ], 404);
+        }
+        
+        $order->load(['items.product.images']);
 
         return response()->json($order);
     }

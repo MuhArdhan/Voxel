@@ -37,6 +37,8 @@ class Product extends Model
         'weight' => 'integer',
     ];
 
+    protected $appends = ['primary_image'];
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
@@ -49,10 +51,13 @@ class Product extends Model
         return $this->discount_price ?? $this->price;
     }
 
-    public function getPrimaryImageAttribute(): ?string
+    public function getPrimaryImageAttribute(): ?ProductImage
     {
-        $image = $this->images()->where('is_primary', true)->first();
-        return $image ? $image->image_path : null;
+        // Use loaded relationship if available, otherwise query
+        if ($this->relationLoaded('images')) {
+            return $this->images->firstWhere('is_primary', true);
+        }
+        return $this->images()->where('is_primary', true)->first();
     }
 
     public function category(): BelongsTo
