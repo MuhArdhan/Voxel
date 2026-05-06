@@ -14,6 +14,8 @@ export interface User {
   avatar?: string;
   role: "user" | "admin";
   is_blocked: boolean;
+  total_orders?: number;
+  total_spent?: number;
   created_at: string;
   updated_at: string;
 }

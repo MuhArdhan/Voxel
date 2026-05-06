@@ -107,12 +107,12 @@ export default function OrdersPage() {
           transition={{ duration: 0.6 }}
           className="mb-14"
         >
-          <Link
-            href="/"
+          <button
+            onClick={() => router.back()}
             className="inline-flex items-center gap-2 mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase hover:text-[#0A0A0A] transition-colors mb-8"
           >
-            ← Return to Home
-          </Link>
+            ← Go Back
+          </button>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>

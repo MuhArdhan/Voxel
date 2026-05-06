@@ -8,7 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { apiPost } from "@/lib/api";
+import { apiPost, apiGet } from "@/lib/api";
 import {
   getToken,
   setToken,
@@ -95,9 +95,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     try {
-      const res = await apiPost<{ user: User }>("/auth/me");
-      setUser(res.user);
-      setStoredUser(res.user);
+      // api.php defines GET /auth/me, and it returns the User directly, not wrapped in { user: ... }
+      const res = await apiGet<User>("/auth/me");
+      setUser(res);
+      setStoredUser(res);
     } catch (err) {
       const msg = getErrorMessage(err);
       console.warn("Failed to refresh user:", msg);
