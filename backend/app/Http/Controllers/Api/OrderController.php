@@ -13,11 +13,22 @@ class OrderController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $orders = $request->user()
+        $query = $request->user()
             ->orders()
             ->with(['items.product.images'])
-            ->latest()
-            ->paginate(10);
+            ->latest();
+
+        if ($request->has('search') && $request->input('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhereHas('items', function($itemQuery) use ($search) {
+                      $itemQuery->where('product_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $orders = $query->paginate(10);
 
         return response()->json($orders);
     }

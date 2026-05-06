@@ -7,20 +7,26 @@ import { apiGet, apiPost } from "@/lib/api";
 import { formatPrice, formatDate, getErrorMessage } from "@/lib/utils";
 import type { Order } from "@/types";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const statusConfig: Record<
   Order["status"],
-  { label: string; color: string; bg: string }
+  { label: string; text: string; bg: string; border: string; glow: string }
 > = {
-  pending: { label: "Menunggu Pembayaran", color: "text-yellow-600", bg: "bg-yellow-50" },
-  paid: { label: "Dibayar", color: "text-blue-600", bg: "bg-blue-50" },
-  processing: { label: "Diproses", color: "text-purple-600", bg: "bg-purple-50" },
-  shipped: { label: "Dikirim", color: "text-indigo-600", bg: "bg-indigo-50" },
-  completed: { label: "Selesai", color: "text-green-600", bg: "bg-green-50" },
-  cancelled: { label: "Dibatalkan", color: "text-red-600", bg: "bg-red-50" },
+  pending: { label: "AWAITING PAYMENT", text: "text-[#FFB347]", bg: "bg-[#FFB347]/10", border: "border-[#FFB347]/30", glow: "from-[#FFB347]" },
+  paid: { label: "PAID", text: "text-[#00D4FF]", bg: "bg-[#00D4FF]/10", border: "border-[#00D4FF]/30", glow: "from-[#00D4FF]" },
+  processing: { label: "PROCESSING", text: "text-[#8B5CF6]", bg: "bg-[#8B5CF6]/10", border: "border-[#8B5CF6]/30", glow: "from-[#8B5CF6]" },
+  shipped: { label: "SHIPPED", text: "text-[#C8FF00]", bg: "bg-[#C8FF00]/10", border: "border-[#C8FF00]/30", glow: "from-[#C8FF00]" },
+  completed: { label: "COMPLETED", text: "text-[#10B981]", bg: "bg-[#10B981]/10", border: "border-[#10B981]/30", glow: "from-[#10B981]" },
+  cancelled: { label: "CANCELLED", text: "text-[#FF6B6B]", bg: "bg-[#FF6B6B]/10", border: "border-[#FF6B6B]/30", glow: "from-[#FF6B6B]" },
 };
 
 const statusSteps: Order["status"][] = ["pending", "paid", "processing", "shipped", "completed"];
+
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -66,7 +72,7 @@ export default function OrderDetailPage() {
   }
 
   async function handleCancelOrder() {
-    if (!order || !confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) return;
+    if (!order || !confirm("Are you sure you want to cancel this order?")) return;
 
     try {
       setIsCancelling(true);
@@ -79,28 +85,13 @@ export default function OrderDetailPage() {
     }
   }
 
-  if (authLoading || !isLoggedIn) {
+  if (authLoading || !isLoggedIn || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-[#F2F0EB] flex items-center justify-center py-24">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-neutral-600">Memuat...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-neutral-50 py-12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-neutral-200 rounded w-1/3" />
-            <div className="bg-white border border-neutral-200 rounded-lg p-6 space-y-4">
-              <div className="h-4 bg-neutral-200 rounded w-1/2" />
-              <div className="h-4 bg-neutral-200 rounded w-2/3" />
-              <div className="h-4 bg-neutral-200 rounded w-1/4" />
-            </div>
+          <div className="w-10 h-10 border-2 border-[#0A0A0A] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="mono text-[10px] text-[#8A8680] tracking-[0.3em] uppercase animate-pulse">
+            System Protocol // Loading
           </div>
         </div>
       </div>
@@ -109,16 +100,16 @@ export default function OrderDetailPage() {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-neutral-50 py-12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-lg">
-            {error || "Pesanan tidak ditemukan"}
+      <div className="min-h-screen bg-[#F2F0EB] py-24 md:py-32 relative">
+        <div className="max-w-[1000px] mx-auto px-6 md:px-10 relative z-10">
+          <div className="bg-[#FF6B6B]/10 border border-[#FF6B6B]/30 text-[#FF6B6B] px-6 py-4 rounded-xl font-mono text-sm tracking-wider mb-6">
+            ERR // {error || "Order details not found."}
           </div>
           <Link
             href="/orders"
-            className="inline-block mt-6 text-sm text-neutral-600 hover:text-black"
+            className="inline-flex items-center gap-2 mono text-[10px] text-[#0A0A0A] tracking-[0.2em] uppercase font-bold hover:opacity-70 transition-opacity"
           >
-            ← Kembali ke Daftar Pesanan
+            ← Return to History
           </Link>
         </div>
       </div>
@@ -129,61 +120,89 @@ export default function OrderDetailPage() {
   const currentStepIndex = statusSteps.indexOf(order.status);
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+    <div className="min-h-screen bg-[#F2F0EB] py-24 md:py-32 relative">
+      {/* Grain texture overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.15]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E")`,
+          backgroundSize: "200px 200px",
+        }}
+      />
+
+      <div className="max-w-[1000px] mx-auto px-6 md:px-10 relative z-10">
         {/* Success Banner */}
         {showSuccessBanner && (
-          <div className="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-lg mb-6 flex items-start justify-between">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-[#10B981]/10 border border-[#10B981]/30 text-[#10B981] px-6 py-4 rounded-xl mb-8 flex items-start justify-between backdrop-blur-sm"
+          >
             <div>
-              <p className="font-semibold mb-1">✓ Pesanan Berhasil Dibuat!</p>
-              <p className="text-sm">
-                Terima kasih atas pesanan Anda. Kami akan segera memprosesnya.
+              <p className="font-mono text-sm font-bold mb-1 tracking-wider">ORDER SUCCESS</p>
+              <p className="text-sm opacity-90">
+                Your order has been registered in the system. Processing will commence shortly.
               </p>
             </div>
             <button
               onClick={() => setShowSuccessBanner(false)}
-              className="text-green-600 hover:text-green-800"
+              className="text-[#10B981] hover:text-[#0A0A0A] transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <span className="text-xl leading-none">×</span>
             </button>
-          </div>
+          </motion.div>
         )}
 
         {/* Header */}
-        <div className="mb-8">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mb-10"
+        >
           <Link
             href="/orders"
-            className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-black mb-4"
+            className="inline-flex items-center gap-2 mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase hover:text-[#0A0A0A] transition-colors mb-8"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Kembali ke Daftar Pesanan
+            ← Return to History
           </Link>
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Detail Pesanan</h1>
-              <p className="font-mono text-sm text-neutral-600">{order.order_number}</p>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-8 h-px bg-[#C8C4BC]" />
+                <div className="mono text-[10px] text-[#8A8680] tracking-[0.25em] uppercase">
+                  Order Details
+                </div>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#0A0A0A] mb-2">
+                {order.order_number}
+              </h1>
             </div>
-            <span
-              className={`px-4 py-2 rounded-full text-sm font-medium ${status.bg} ${status.color}`}
-            >
-              {status.label}
-            </span>
+            <div className="md:pb-2">
+              <span
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-[10px] font-bold tracking-[0.2em] uppercase border ${status.bg} ${status.text} ${status.border}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${status.bg.replace('/10', '')} ${order.status !== 'cancelled' && order.status !== 'completed' ? 'animate-pulse' : ''}`} />
+                {status.label}
+              </span>
+            </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Status Tracker */}
         {order.status !== "cancelled" && (
-          <div className="bg-white border border-neutral-200 rounded-lg p-6 mb-6">
-            <h2 className="font-semibold mb-6">Status Pesanan</h2>
-            <div className="relative">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-[#E8E5DF]/60 border border-[#C8C4BC]/60 rounded-2xl p-8 md:p-10 mb-8 relative overflow-hidden"
+          >
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#0A0A0A]/10" />
+            
+            <div className="relative max-w-3xl mx-auto">
               {/* Progress Line */}
-              <div className="absolute top-5 left-0 right-0 h-0.5 bg-neutral-200">
+              <div className="absolute top-5 left-[10%] right-[10%] h-px bg-[#C8C4BC]">
                 <div
-                  className="h-full bg-black transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-[#0A0A0A] to-[#0A0A0A] transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(10,10,10,0.5)]"
                   style={{
                     width: `${(currentStepIndex / (statusSteps.length - 1)) * 100}%`,
                   }}
@@ -191,77 +210,101 @@ export default function OrderDetailPage() {
               </div>
 
               {/* Steps */}
-              <div className="relative flex justify-between">
+              <div className="relative flex justify-between z-10">
                 {statusSteps.map((step, index) => {
                   const isActive = index <= currentStepIndex;
                   const stepConfig = statusConfig[step];
                   return (
-                    <div key={step} className="flex flex-col items-center">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors ${
-                          isActive ? "bg-black text-white" : "bg-neutral-200 text-neutral-400"
-                        }`}
+                    <div key={step} className="flex flex-col items-center w-1/5 group">
+                      <motion.div
+                        initial={false}
+                        animate={{
+                          scale: isActive ? 1 : 0.8,
+                          backgroundColor: isActive ? "#0A0A0A" : "#E8E5DF",
+                          borderColor: isActive ? "#0A0A0A" : "#C8C4BC",
+                        }}
+                        className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center mb-4 transition-colors duration-500 shadow-sm relative ${isActive ? "text-[#F2F0EB]" : "text-[#8A8680]"}`}
                       >
-                        {isActive ? (
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        ) : (
-                          <span className="text-sm font-medium">{index + 1}</span>
+                        {isActive && (
+                          <div className={`absolute inset-0 border border-white/20 rounded-lg animate-ping opacity-20`} />
                         )}
-                      </div>
+                        {isActive ? (
+                          <span className="text-[10px] mono font-bold">0{index + 1}</span>
+                        ) : (
+                          <span className="text-[10px] mono font-medium">0{index + 1}</span>
+                        )}
+                      </motion.div>
                       <p
-                        className={`text-xs text-center max-w-[80px] ${
-                          isActive ? "text-black font-medium" : "text-neutral-500"
+                        className={`text-[9px] text-center uppercase tracking-[0.2em] font-bold ${
+                          isActive ? "text-[#0A0A0A]" : "text-[#8A8680]"
                         }`}
                       >
-                        {stepConfig.label}
+                        {stepConfig.label.split(" ")[0]}
                       </p>
                     </div>
                   );
                 })}
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column — Items & Shipping */}
-          <div className="lg:col-span-2 space-y-6">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="lg:col-span-2 space-y-8"
+          >
             {/* Order Items */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6">
-              <h2 className="font-semibold mb-4">Produk yang Dipesan</h2>
-              <div className="space-y-4">
+            <div className="bg-[#E8E5DF]/60 border border-[#C8C4BC]/60 rounded-2xl p-6 md:p-8">
+              <h2 className="mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+                <span className="w-4 h-px bg-[#C8C4BC]" />
+                Items
+              </h2>
+              <div className="space-y-6">
                 {order.items.map((item) => (
-                  <div key={item.id} className="flex gap-4 pb-4 border-b border-neutral-100 last:border-0 last:pb-0">
-                    <div className="w-20 h-20 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <div key={item.id} className="flex flex-col sm:flex-row gap-6 pb-6 border-b border-[#C8C4BC]/40 last:border-0 last:pb-0">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#D4D0C8] rounded-xl overflow-hidden flex-shrink-0 border border-[#C8C4BC]">
                       {item.product?.primary_image ? (
                         <img
                           src={item.product.primary_image.image_url}
                           alt={item.product_name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover mix-blend-multiply hover:scale-105 transition-transform duration-700"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-neutral-400">
-                          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
+                        <div className="w-full h-full flex items-center justify-center text-[#8A8680] mono text-[10px] uppercase">
+                          No Img
                         </div>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium mb-1">{item.product_name}</h3>
-                      <p className="text-sm text-neutral-600 mb-1">
-                        SKU: <span className="font-mono">{item.product_sku}</span>
-                      </p>
-                      <p className="text-sm text-neutral-600">
-                        Ukuran: {item.variant_size}
-                        {item.variant_color && ` • Warna: ${item.variant_color}`}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-neutral-600 mb-1">x{item.quantity}</p>
-                      <p className="font-semibold">{formatPrice(item.subtotal)}</p>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-[#0A0A0A] text-lg leading-tight mb-3">{item.product_name}</h3>
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 mb-2">
+                          <div>
+                            <p className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase mb-1">SKU</p>
+                            <p className="mono text-[11px] font-bold text-[#4A4845]">{item.product_sku}</p>
+                          </div>
+                          <div>
+                            <p className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase mb-1">Size</p>
+                            <p className="mono text-[11px] font-bold text-[#4A4845]">{item.variant_size}</p>
+                          </div>
+                          {item.variant_color && (
+                            <div>
+                              <p className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase mb-1">Color</p>
+                              <p className="mono text-[11px] font-bold text-[#4A4845]">{item.variant_color}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-end justify-between mt-4 sm:mt-0">
+                        <div className="mono text-[10px] tracking-wider font-bold bg-[#0A0A0A] text-[#F2F0EB] px-2.5 py-1 rounded">
+                          QTY {String(item.quantity).padStart(2, '0')}
+                        </div>
+                        <p className="text-xl font-bold text-[#0A0A0A] tracking-tight">{formatPrice(item.subtotal)}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -269,84 +312,104 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Shipping Info */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6">
-              <h2 className="font-semibold mb-4">Informasi Pengiriman</h2>
-              <div className="space-y-3 text-sm">
+            <div className="bg-[#E8E5DF]/60 border border-[#C8C4BC]/60 rounded-2xl p-6 md:p-8">
+              <h2 className="mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+                <span className="w-4 h-px bg-[#C8C4BC]" />
+                Shipping Details
+              </h2>
+              <div className="grid sm:grid-cols-2 gap-8">
                 <div>
-                  <p className="text-neutral-600 mb-1">Penerima</p>
-                  <p className="font-medium">{order.shipping_name}</p>
-                  <p className="text-neutral-600">{order.shipping_phone}</p>
+                  <p className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase mb-1.5">Recipient Identity</p>
+                  <p className="font-bold text-[#0A0A0A]">{order.shipping_name}</p>
+                  <p className="text-[#4A4845] text-sm">{order.shipping_phone}</p>
                 </div>
                 <div>
-                  <p className="text-neutral-600 mb-1">Alamat</p>
-                  <p className="font-medium">{order.shipping_address}</p>
-                  <p className="text-neutral-600">
+                  <p className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase mb-1.5">Address</p>
+                  <p className="font-bold text-[#0A0A0A]">{order.shipping_address}</p>
+                  <p className="text-[#4A4845] text-sm">
                     {order.shipping_city}, {order.shipping_province} {order.shipping_postal_code}
                   </p>
                 </div>
                 <div>
-                  <p className="text-neutral-600 mb-1">Kurir</p>
-                  <p className="font-medium">
-                    {order.courier.toUpperCase()} - {order.courier_service}
+                  <p className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase mb-1.5">Logistics</p>
+                  <p className="font-bold text-[#0A0A0A]">
+                    {order.courier.toUpperCase()} <span className="text-[#8A8680] font-normal text-sm">— {order.courier_service}</span>
                   </p>
                 </div>
                 {order.tracking_number && (
                   <div>
-                    <p className="text-neutral-600 mb-1">Nomor Resi</p>
-                    <p className="font-mono font-medium">{order.tracking_number}</p>
+                    <p className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase mb-1.5">Tracking ID</p>
+                    <p className="mono text-sm font-bold text-[#0A0A0A] mb-2 inline-block">
+                      {order.tracking_number}
+                    </p>
                     <a
                       href={`https://cekresi.com/?noresi=${order.tracking_number}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline mt-1 inline-block"
+                      className="block mono text-[9px] font-bold text-[#00D4FF] hover:text-[#0A0A0A] uppercase tracking-[0.1em] transition-colors"
                     >
-                      Lacak Paket →
+                      Initialize Tracking →
                     </a>
                   </div>
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column — Summary & Actions */}
-          <div className="space-y-6">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-8"
+          >
             {/* Order Summary */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6">
-              <h2 className="font-semibold mb-4">Ringkasan Pesanan</h2>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Subtotal</span>
-                  <span className="font-medium">{formatPrice(order.subtotal)}</span>
+            <div className="bg-[#0A0A0A] border border-[#2A2A2A] rounded-3xl p-6 sm:p-8 text-[#F2F0EB]">
+              <h2 className="text-xl font-black mb-6 border-b border-[#2A2A2A] pb-4">Order Summary</h2>
+
+              <div className="space-y-3 mb-6 text-sm">
+                <div className="flex justify-between text-[#8A8680]">
+                  <span>Subtotal</span>
+                  <span className="mono text-[#F2F0EB]">{formatPrice(order.subtotal)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Ongkir</span>
-                  <span className="font-medium">{formatPrice(order.shipping_cost)}</span>
+                <div className="flex justify-between text-[#8A8680]">
+                  <span>Shipping Cost</span>
+                  <span className="mono text-[#F2F0EB]">{formatPrice(order.shipping_cost)}</span>
                 </div>
-                <div className="pt-3 border-t border-neutral-200 flex justify-between">
-                  <span className="font-semibold">Total</span>
-                  <span className="font-bold text-lg">{formatPrice(order.total_price)}</span>
-                </div>
+              </div>
+
+              <div className="flex justify-between items-end pt-6 border-t border-[#2A2A2A]">
+                <span className="font-bold text-[#8A8680]">Total</span>
+                <span className="mono text-2xl font-black text-white">
+                  {formatPrice(order.total_price)}
+                </span>
               </div>
             </div>
 
             {/* Order Info */}
-            <div className="bg-white border border-neutral-200 rounded-lg p-6">
-              <h2 className="font-semibold mb-4">Informasi Pesanan</h2>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-neutral-600">Tanggal Pesanan</span>
-                  <span className="font-medium">{formatDate(order.created_at)}</span>
+            <div className="bg-[#E8E5DF]/60 border border-[#C8C4BC]/60 rounded-2xl p-6 md:p-8">
+              <h2 className="mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase mb-6 flex items-center gap-3">
+                <span className="w-4 h-px bg-[#C8C4BC]" />
+                Metadata
+              </h2>
+              <div className="space-y-5">
+                <div>
+                  <span className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase block mb-1">Order date</span>
+                  <span className="font-bold text-[#0A0A0A]">{formatDate(order.created_at)}</span>
                 </div>
                 {order.paid_at && (
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Tanggal Bayar</span>
-                    <span className="font-medium">{formatDate(order.paid_at)}</span>
+                  <div>
+                    <span className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase block mb-1">Timestamp Auth</span>
+                    <span className="font-bold text-[#0A0A0A]">{formatDate(order.paid_at)}</span>
                   </div>
                 )}
                 {order.notes && (
-                  <div className="pt-2 border-t border-neutral-100">
-                    <p className="text-neutral-600 mb-1">Catatan</p>
-                    <p className="text-neutral-800">{order.notes}</p>
+                  <div className="pt-5 border-t border-[#C8C4BC]/40">
+                    <span className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase block mb-2">User Notes</span>
+                    <div className="bg-[#E8E5DF] border border-[#C8C4BC] rounded p-3 text-sm text-[#4A4845] relative">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-[#C8C4BC]" />
+                      {order.notes}
+                    </div>
                   </div>
                 )}
               </div>
@@ -357,12 +420,14 @@ export default function OrderDetailPage() {
               <button
                 onClick={handleCancelOrder}
                 disabled={isCancelling}
-                className="w-full px-4 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full relative group bg-transparent border border-[#FF6B6B]/50 text-[#FF6B6B] font-mono text-[10px] font-bold tracking-[0.2em] uppercase py-4 rounded-xl hover:bg-[#FF6B6B]/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
               >
-                {isCancelling ? "Membatalkan..." : "Batalkan Pesanan"}
+                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#FF6B6B] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#FF6B6B] opacity-0 group-hover:opacity-100 transition-opacity" />
+                {isCancelling ? "CANCELING..." : "CANCEL ORDER"}
               </button>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
