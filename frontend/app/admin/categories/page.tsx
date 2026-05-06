@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { apiGet, apiPost, apiDelete } from "@/lib/api";
+import { apiGet, apiPost, apiDelete, STORAGE_URL } from "@/lib/api";
 import { type PaginatedResponse, type Category } from "@/types";
 import { Plus, Edit, Trash2, X, Image as ImageIcon, Check } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -143,7 +143,7 @@ export default function AdminCategoriesPage() {
                     <td className="p-4 pl-6">
                       <div className="w-10 h-10 bg-[#F2F0EB] rounded-lg border border-[#C8C4BC]/60 flex items-center justify-center overflow-hidden shrink-0">
                         {cat.image ? (
-                          <img src={`http://localhost:8000/storage/${cat.image}`} alt={cat.name} className="w-full h-full object-cover" />
+                          <img src={`${STORAGE_URL}/${cat.image}`} alt={cat.name} className="w-full h-full object-cover" />
                         ) : (
                           <ImageIcon className="text-[#C8C4BC]" size={16} />
                         )}

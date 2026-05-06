@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
+import { STORAGE_URL } from "@/lib/api";
 import { LayoutDashboard, Package, ShoppingCart, Users, Tag, LogOut, ArrowLeft } from "lucide-react";
 
 const adminNav = [
@@ -80,7 +81,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center border border-[#8A8680]/30 overflow-hidden shrink-0">
               {user?.avatar ? (
-                <img src={`http://localhost:8000/storage/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
+                <img src={`${STORAGE_URL}/${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-xs">⚡</span>
               )}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiPost, apiPut } from "@/lib/api";
+import { apiPost, apiPut, STORAGE_URL } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,7 +37,7 @@ export default function AccountSettings() {
       setPhone(user.phone || "");
       setAddress(user.address || "");
       if (user.avatar) {
-        setAvatarPreview(`http://localhost:8000/storage/${user.avatar}`);
+        setAvatarPreview(`${STORAGE_URL}/${user.avatar}`);
       }
     }
   }, [user]);

@@ -6,6 +6,7 @@ import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { STORAGE_URL } from "@/lib/api";
 
 export default function CartPage() {
   const { cart, isLoading, updateItem, removeItem } = useCart();
@@ -89,7 +90,7 @@ export default function CartPage() {
                   >
                     {img ? (
                       <img
-                        src={img.image_url}
+                        src={`${STORAGE_URL}/${img.image_path}`}
                         alt={item.product.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />

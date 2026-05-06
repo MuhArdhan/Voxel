@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet, apiPut } from "@/lib/api";
+import { apiGet, apiPut, STORAGE_URL } from "@/lib/api";
 import { type Order } from "@/types";
 import { formatPrice, formatDate } from "@/lib/utils";
 import Link from "next/link";
@@ -197,7 +197,7 @@ export default function AdminOrderDetailPage() {
                 <div key={item.id} className="p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                   <div className="w-20 h-20 bg-[#F2F0EB] border border-[#C8C4BC]/60 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
                     {item.product?.primary_image ? (
-                      <img src={`http://localhost:8000/storage/${item.product.primary_image.image_path}`} alt={item.product_name} className="w-full h-full object-cover" />
+                      <img src={`${STORAGE_URL}/${item.product.primary_image.image_path}`} alt={item.product_name} className="w-full h-full object-cover" />
                     ) : (
                       <Package className="text-[#C8C4BC]" size={24} />
                     )}

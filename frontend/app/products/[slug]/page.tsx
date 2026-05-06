@@ -14,7 +14,7 @@ import {
   Package,
 } from "lucide-react";
 import { toast } from "sonner";
-import { apiGet } from "@/lib/api";
+import { apiGet, STORAGE_URL } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import type { Product, ProductVariant } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -122,7 +122,9 @@ export default function ProductDetailPage() {
     primaryIndex > 0
       ? [images[primaryIndex], ...images.filter((_, i) => i !== primaryIndex)]
       : images;
-  const activeImageUrl = orderedImages[activeImage]?.image_url;
+  const activeImageUrl = orderedImages[activeImage]
+    ? `${STORAGE_URL}/${orderedImages[activeImage].image_path}`
+    : undefined;
 
   // Loading
   if (isLoading) {
@@ -260,7 +262,7 @@ export default function ProductDetailPage() {
                           : "border-[#C8C4BC] hover:border-[#8A8680]"
                       }`}
                     >
-                      <img src={img.image_url} alt="thumb" className="w-full h-full object-cover" />
+                      <img src={`${STORAGE_URL}/${img.image_path}`} alt="thumb" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

@@ -9,7 +9,7 @@ import { Check, ChevronRight, Lock, MapPin, Truck, CreditCard } from "lucide-rea
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { checkoutSchema, CheckoutFormData, CheckoutPayload } from "@/types";
-import { apiPost } from "@/lib/api";
+import { apiPost, STORAGE_URL } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -474,7 +474,7 @@ export default function CheckoutPage() {
                   <div key={item.id} className="flex gap-4 items-start">
                     <div className="w-16 h-16 bg-[#1A1A1A] rounded-xl overflow-hidden shrink-0 border border-[#2A2A2A]">
                       {item.product.images?.[0] ? (
-                        <img src={item.product.images[0].image_url} alt={item.product.name} className="w-full h-full object-cover opacity-80" />
+                        <img src={`${STORAGE_URL}/${item.product.images[0].image_path}`} alt={item.product.name} className="w-full h-full object-cover opacity-80" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-xl">👕</div>
                       )}
