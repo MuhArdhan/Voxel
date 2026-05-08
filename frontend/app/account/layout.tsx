@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import Navbar from "@/components/Navbar";
 
 const navItems = [
   { name: "Dashboard", href: "/account" },
@@ -43,6 +44,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
   return (
     <section className="min-h-screen pt-24 pb-16 md:pt-32 bg-[#F2F0EB] relative">
+      <Navbar />
       {/* Grain texture overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15]"
         style={{

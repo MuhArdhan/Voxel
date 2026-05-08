@@ -22,6 +22,7 @@ import { useProducts } from "@/hooks/useProducts";
 import ProductCard from "@/components/ProductCard";
 import { ProductCardSkeleton, Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/contexts/CartContext";
+import Navbar from "@/components/Navbar";
 
 // Animated price
 function PriceDisplay({ price }: { price: number }) {
@@ -172,6 +173,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#F2F0EB]">
+      <Navbar />
       <div className="max-w-[1400px] mx-auto px-6 md:px-10 pt-28 pb-20">
 
         {/* Breadcrumbs */}

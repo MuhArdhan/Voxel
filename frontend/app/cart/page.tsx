@@ -7,6 +7,7 @@ import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { STORAGE_URL } from "@/lib/api";
+import Navbar from "@/components/Navbar";
 
 export default function CartPage() {
   const { cart, isLoading, updateItem, removeItem } = useCart();
@@ -66,6 +67,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-[#F2F0EB] pt-28 pb-16 px-6 md:px-10">
+      <Navbar />
       <div className="max-w-[1200px] mx-auto">
         <h1 className="text-4xl md:text-5xl font-black text-[#0A0A0A] tracking-tight mb-10">
           Your Cart

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiGet, STORAGE_URL } from "@/lib/api";
+import Navbar from "@/components/Navbar";
 import { formatPrice, formatDate, getErrorMessage } from "@/lib/utils";
 import type { Order, PaginatedResponse } from "@/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 
 const statusConfig: Record<
   Order["status"],
@@ -91,6 +92,7 @@ export default function OrdersPage() {
 
   return (
     <section className="min-h-screen py-24 md:py-32 bg-[#F2F0EB] relative">
+      <Navbar />
       {/* Grain texture overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15]"
         style={{

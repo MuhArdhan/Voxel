@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, STORAGE_URL } from "@/lib/api";
 import { formatPrice, formatDate, getErrorMessage } from "@/lib/utils";
 import type { Order } from "@/types";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { STORAGE_URL } from "@/lib/api";
+import Navbar from "@/components/Navbar";
 
 const statusConfig: Record<
   Order["status"],
@@ -122,6 +122,7 @@ export default function OrderDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#F2F0EB] py-24 md:py-32 relative">
+      <Navbar />
       {/* Grain texture overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15]"
         style={{

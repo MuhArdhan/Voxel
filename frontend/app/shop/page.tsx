@@ -14,6 +14,7 @@ import { ProductCardSkeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { ProductFilters } from "@/types";
+import Navbar from "@/components/Navbar";
 
 function ShopContent() {
   const router = useRouter();
@@ -205,20 +206,23 @@ function ShopContent() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen pt-24 px-6 md:px-10 max-w-[1400px] mx-auto">
-        <div className="h-10 w-48 bg-[#E8E5DF] animate-pulse rounded mb-10" />
-        <div className="flex gap-10">
-          <div className="hidden md:block w-64 shrink-0 h-[600px] bg-[#E8E5DF] animate-pulse rounded-xl" />
-          <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {[...Array(8)].map((_, i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
+    <>
+      <Navbar />
+      <Suspense fallback={
+        <div className="min-h-screen pt-24 px-6 md:px-10 max-w-[1400px] mx-auto">
+          <div className="h-10 w-48 bg-[#E8E5DF] animate-pulse rounded mb-10" />
+          <div className="flex gap-10">
+            <div className="hidden md:block w-64 shrink-0 h-[600px] bg-[#E8E5DF] animate-pulse rounded-xl" />
+            <div className="flex-1 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {[...Array(8)].map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    }>
-      <ShopContent />
-    </Suspense>
+      }>
+        <ShopContent />
+      </Suspense>
+    </>
   );
 }
