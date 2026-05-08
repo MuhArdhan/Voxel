@@ -6,6 +6,7 @@ import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
+import { STORAGE_URL } from "@/lib/api";
 
 export default function CartSlideOver() {
   const { cart, isLoading, isCartOpen, setIsCartOpen, updateItem, removeItem } = useCart();
@@ -114,7 +115,7 @@ export default function CartSlideOver() {
                         {/* Thumbnail */}
                         <div className="relative w-20 h-24 bg-[#E8E5DF] rounded-xl overflow-hidden shrink-0 border border-[#C8C4BC]/50">
                           {img ? (
-                            <img src={img.image_url} alt={item.product.name} className="w-full h-full object-cover" />
+                            <img src={`${STORAGE_URL}/${img.image_path}`} alt={item.product.name} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-2xl opacity-20">👕</div>
                           )}

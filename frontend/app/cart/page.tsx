@@ -75,7 +75,7 @@ export default function CartPage() {
           {/* LEFT: Item List */}
           <div className="w-full lg:w-2/3 flex flex-col gap-6">
             {cart.items.map((item) => {
-              const img = item.product.images?.find((i) => i.is_primary) || item.product.images?.[0];
+              const img = item.product?.images?.find((i) => i.is_primary) || item.product?.images?.[0];
               const price = Number(item.subtotal);
               
               return (

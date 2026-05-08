@@ -8,6 +8,7 @@ import { formatPrice, formatDate, getErrorMessage } from "@/lib/utils";
 import type { Order } from "@/types";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { STORAGE_URL } from "@/lib/api";
 
 const statusConfig: Record<
   Order["status"],
@@ -267,17 +268,25 @@ export default function OrderDetailPage() {
                 {order.items.map((item) => (
                   <div key={item.id} className="flex flex-col sm:flex-row gap-6 pb-6 border-b border-[#C8C4BC]/40 last:border-0 last:pb-0">
                     <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#D4D0C8] rounded-xl overflow-hidden flex-shrink-0 border border-[#C8C4BC]">
-                      {item.product?.primary_image ? (
-                        <img
-                          src={item.product.primary_image.image_url}
-                          alt={item.product_name}
-                          className="w-full h-full object-cover mix-blend-multiply hover:scale-105 transition-transform duration-700"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[#8A8680] mono text-[10px] uppercase">
-                          No Img
-                        </div>
-                      )}
+                      {(() => {
+                        const productImages = item.product?.images || [];
+                        const img = productImages.find(i => i.is_primary) || productImages[0];
+                        
+                        if (img) {
+                          return (
+                            <img
+                              src={`${STORAGE_URL}/${img.image_path}`}
+                              alt={item.product_name}
+                              className="w-full h-full object-cover mix-blend-multiply hover:scale-105 transition-transform duration-700"
+                            />
+                          );
+                        }
+                        return (
+                          <div className="w-full h-full flex items-center justify-center text-[#8A8680] mono text-[10px] uppercase">
+                            No Img
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div>

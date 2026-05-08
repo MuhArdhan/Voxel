@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiGet } from "@/lib/api";
+import { apiGet, STORAGE_URL } from "@/lib/api";
 import { formatPrice, formatDate, getErrorMessage } from "@/lib/utils";
 import type { Order, PaginatedResponse } from "@/types";
 import Link from "next/link";
@@ -254,17 +254,25 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-3">
                         {order.items.slice(0, 3).map((item, idx) => (
                           <div key={item.id} className={`w-12 h-12 bg-[#D4D0C8] rounded-lg overflow-hidden flex-shrink-0 border border-[#E8E5DF] ${idx > 0 ? '-ml-5' : ''} group-hover:translate-y-[-2px] transition-transform duration-300`} style={{ transitionDelay: `${idx * 50}ms` }}>
-                            {item.product?.primary_image ? (
-                              <img
-                                src={item.product.primary_image.image_url}
-                                alt={item.product_name}
-                                className="w-full h-full object-cover mix-blend-multiply"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-[#8A8680]/50 text-xs">
-                                IMG
-                              </div>
-                            )}
+                            {(() => {
+                              const productImages = item.product?.images || [];
+                              const img = productImages.find(i => i.is_primary) || productImages[0];
+                              
+                              if (img) {
+                                return (
+                                  <img
+                                    src={`${STORAGE_URL}/${img.image_path}`}
+                                    alt={item.product_name}
+                                    className="w-full h-full object-cover mix-blend-multiply"
+                                  />
+                                );
+                              }
+                              return (
+                                <div className="w-full h-full flex items-center justify-center text-[#8A8680]/50 text-xs">
+                                  IMG
+                                </div>
+                              );
+                            })()}
                           </div>
                         ))}
                         {order.items.length > 3 && (
