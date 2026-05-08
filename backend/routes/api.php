@@ -109,5 +109,6 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::get('/', [AdminUserController::class, 'index']);
         Route::get('/{user}', [AdminUserController::class, 'show']);
         Route::post('/{user}/toggle-block', [AdminUserController::class, 'toggleBlock']);
+        Route::post('/{user}/toggle-role', [AdminUserController::class, 'toggleRole']);
     });
 });

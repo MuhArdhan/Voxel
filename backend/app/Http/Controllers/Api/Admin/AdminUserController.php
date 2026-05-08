@@ -11,7 +11,7 @@ class AdminUserController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = User::where('role', 'user')->latest();
+        $query = User::where('role', '!=', 'admin')->latest();
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%')
@@ -36,7 +36,28 @@ class AdminUserController extends Controller
 
         return response()->json([
             'message' => $user->is_blocked ? 'User blocked' : 'User unblocked',
-            'user' => $user->fresh(),
+            'user'    => $user->fresh(),
+        ]);
+    }
+
+    public function toggleRole(User $user): JsonResponse
+    {
+        // Prevent removing the last admin
+        if ($user->isAdmin()) {
+            $adminCount = User::where('role', 'admin')->count();
+            if ($adminCount <= 1) {
+                return response()->json(['message' => 'Cannot demote the last admin'], 403);
+            }
+            $user->update(['role' => 'user']);
+            $message = 'User demoted to regular user';
+        } else {
+            $user->update(['role' => 'admin']);
+            $message = 'User promoted to admin';
+        }
+
+        return response()->json([
+            'message' => $message,
+            'user'    => $user->fresh(),
         ]);
     }
 }
