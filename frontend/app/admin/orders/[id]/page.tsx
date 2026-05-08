@@ -5,7 +5,8 @@ import { apiGet, apiPut, STORAGE_URL } from "@/lib/api";
 import { type Order } from "@/types";
 import { formatPrice, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, User, MapPin, CreditCard, Package } from "lucide-react";
+import { ArrowLeft, User, MapPin, CreditCard, Package, Save } from "lucide-react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useParams } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -271,18 +272,18 @@ export default function AdminOrderDetailPage() {
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-[#8A8680] uppercase">Order Status</label>
-                <select
+                <CustomSelect
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-[#F2F0EB] border border-[#C8C4BC] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A0A0A] text-sm"
-                >
-                  <option value="pending">Pending (Unpaid)</option>
-                  <option value="paid">Paid (Awaiting Processing)</option>
-                  <option value="processing">Processing (Packing)</option>
-                  <option value="shipped">Shipped (In Transit)</option>
-                  <option value="completed">Completed (Delivered)</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                  onChange={(v) => setStatus(v)}
+                  options={[
+                    { label: "Pending — Unpaid",         value: "pending"    },
+                    { label: "Paid — Awaiting Process",  value: "paid"       },
+                    { label: "Processing — Packing",     value: "processing" },
+                    { label: "Shipped — In Transit",     value: "shipped"    },
+                    { label: "Completed — Delivered",    value: "completed"  },
+                    { label: "Cancelled",                value: "cancelled"  },
+                  ]}
+                />
               </div>
 
               {(status === 'shipped' || order.tracking_number) && (
@@ -298,11 +299,12 @@ export default function AdminOrderDetailPage() {
                 </div>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isUpdating}
-                className="w-full bg-[#0A0A0A] text-[#F2F0EB] rounded-xl px-4 py-3 text-sm font-bold hover:bg-[#5C1A1A] disabled:opacity-50 transition-colors mt-2"
+                className="w-full flex items-center justify-center gap-2 bg-[#0A0A0A] text-[#F2F0EB] rounded-xl px-4 py-3 text-sm font-bold hover:bg-[#5C1A1A] disabled:opacity-50 transition-colors mt-2"
               >
+                <Save size={14} />
                 {isUpdating ? "UPDATING..." : "SAVE STATUS"}
               </button>
             </form>

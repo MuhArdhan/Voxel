@@ -93,15 +93,14 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      {/* Header */}
+      <div className="flex items-end justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-black text-[#0A0A0A] tracking-tight mb-2">Categories</h1>
-          <p className="mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase">
-            System Protocol // Classification
-          </p>
+          <h1 className="text-3xl font-black tracking-tight text-[#0A0A0A] uppercase">Categories</h1>
+          <p className="mono text-[10px] tracking-[0.2em] text-[#8A8680] mt-1 uppercase">System Protocol // Classification</p>
         </div>
-        <button 
+        <button
           onClick={() => handleOpenModal()}
           className="inline-flex items-center gap-2 bg-[#0A0A0A] text-[#F2F0EB] px-6 py-3 rounded-xl font-bold hover:bg-[#5C1A1A] transition-colors shadow-sm"
         >
@@ -110,17 +109,17 @@ export default function AdminCategoriesPage() {
         </button>
       </div>
 
-      <div className="bg-white border border-[#C8C4BC] rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-[#C8C4BC] rounded-3xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#F9F8F6] border-b border-[#C8C4BC]/60 mono text-[9px] text-[#8A8680] uppercase tracking-wider">
-                <th className="p-4 pl-6 font-medium w-16">Image</th>
-                <th className="p-4 font-medium">Category Name</th>
-                <th className="p-4 font-medium">Description</th>
-                <th className="p-4 font-medium">Products</th>
-                <th className="p-4 font-medium">Status</th>
-                <th className="p-4 pr-6 font-medium text-right">Actions</th>
+              <tr className="bg-[#F2F0EB]">
+                <th className="p-4 pl-6 mono text-[10px] font-bold text-[#8A8680] tracking-[0.1em] uppercase border-b border-[#C8C4BC]/60 w-16">Image</th>
+                <th className="p-4 mono text-[10px] font-bold text-[#8A8680] tracking-[0.1em] uppercase border-b border-[#C8C4BC]/60">Category Name</th>
+                <th className="p-4 mono text-[10px] font-bold text-[#8A8680] tracking-[0.1em] uppercase border-b border-[#C8C4BC]/60">Description</th>
+                <th className="p-4 mono text-[10px] font-bold text-[#8A8680] tracking-[0.1em] uppercase border-b border-[#C8C4BC]/60">Products</th>
+                <th className="p-4 mono text-[10px] font-bold text-[#8A8680] tracking-[0.1em] uppercase border-b border-[#C8C4BC]/60">Status</th>
+                <th className="p-4 pr-6 mono text-[10px] font-bold text-[#8A8680] tracking-[0.1em] uppercase border-b border-[#C8C4BC]/60 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -137,9 +136,13 @@ export default function AdminCategoriesPage() {
                     </tr>
                   ))}
                 </>
-              ) : data && data.data.length > 0 ? (
-                data.data.map((cat) => (
-                  <tr key={cat.id} className="border-b border-[#C8C4BC]/20 hover:bg-[#F9F8F6]/50 transition-colors">
+              ) : data?.data.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-12 text-center text-[#8A8680] mono text-xs uppercase tracking-widest">No categories found</td>
+                </tr>
+              ) : (
+                data?.data.map((cat) => (
+                  <tr key={cat.id} className="border-b border-[#C8C4BC]/30 hover:bg-[#F2F0EB]/50 transition-colors">
                     <td className="p-4 pl-6">
                       <div className="w-10 h-10 bg-[#F2F0EB] rounded-lg border border-[#C8C4BC]/60 flex items-center justify-center overflow-hidden shrink-0">
                         {cat.image ? (
@@ -171,10 +174,6 @@ export default function AdminCategoriesPage() {
                     </td>
                   </tr>
                 ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="p-12 text-center text-[#8A8680]">No categories found.</td>
-                </tr>
               )}
             </tbody>
           </table>

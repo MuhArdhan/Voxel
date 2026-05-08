@@ -6,6 +6,7 @@ import { type PaginatedResponse, type Product, type Category } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { Search, Filter, Plus, Package, Edit, Trash2, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 export default function AdminProductsPage() {
   const [data, setData] = useState<PaginatedResponse<Product> | null>(null);
@@ -99,19 +100,17 @@ export default function AdminProductsPage() {
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
           </div>
-          <div className="relative w-full sm:w-48">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8680]" size={16} />
-            <select
-              className="w-full pl-10 pr-4 py-2 bg-white border border-[#C8C4BC] rounded-xl text-sm focus:outline-none focus:border-[#0A0A0A] focus:ring-1 focus:ring-[#0A0A0A] appearance-none"
-              value={categoryId}
-              onChange={(e) => { setCategoryId(e.target.value); setPage(1); }}
-            >
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+          <CustomSelect
+            className="w-full sm:w-52"
+            placeholder="All Categories"
+            icon={<Filter size={14} />}
+            value={categoryId}
+            onChange={(v) => { setCategoryId(v); setPage(1); }}
+            options={[
+              { label: "All Categories", value: "" },
+              ...categories.map((c) => ({ label: c.name, value: String(c.id) }))
+            ]}
+          />
         </div>
 
         {/* Table */}
@@ -211,7 +210,7 @@ export default function AdminProductsPage() {
                           </Link>
                           {isDeleted ? (
                             <button
-                              onClick={() => handleRestore(product.id)}
+                              onClick={() => handleRestore(product)}
                               className="p-2 text-[#10B981] hover:bg-[#10B981]/10 rounded-lg transition-colors"
                               title="Restore Product"
                             >
@@ -219,7 +218,7 @@ export default function AdminProductsPage() {
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleDelete(product.id)}
+                              onClick={() => handleDelete(product)}
                               className="p-2 text-[#FF6B6B] hover:bg-[#FF6B6B]/10 rounded-lg transition-colors"
                               title="Deactivate Product"
                             >
