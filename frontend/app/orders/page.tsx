@@ -9,6 +9,7 @@ import { formatPrice, formatDate, getErrorMessage } from "@/lib/utils";
 import type { Order, PaginatedResponse } from "@/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 
 const statusConfig: Record<
   Order["status"],
@@ -102,6 +103,14 @@ export default function OrdersPage() {
       />
 
       <div className="max-w-[1000px] mx-auto px-6 md:px-10 relative z-10">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 mb-8 text-[10px] font-semibold tracking-[0.15em] uppercase text-[#8A8680]">
+          <Link href="/" className="hover:text-[#0A0A0A] transition-colors">Home</Link>
+          <ChevronRight size={12} />
+          <Link href="/account" className="hover:text-[#0A0A0A] transition-colors">Account</Link>
+          <ChevronRight size={12} />
+          <span className="text-[#0A0A0A]">Orders</span>
+        </nav>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -109,12 +118,6 @@ export default function OrdersPage() {
           transition={{ duration: 0.6 }}
           className="mb-14"
         >
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-2 mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase hover:text-[#0A0A0A] transition-colors mb-8"
-          >
-            ← Go Back
-          </button>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>

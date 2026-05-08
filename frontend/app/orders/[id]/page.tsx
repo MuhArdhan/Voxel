@@ -9,6 +9,7 @@ import type { Order } from "@/types";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
+import { ChevronRight } from "lucide-react";
 
 const statusConfig: Record<
   Order["status"],
@@ -161,12 +162,16 @@ export default function OrderDetailPage() {
           animate="visible"
           className="mb-10"
         >
-          <Link
-            href="/orders"
-            className="inline-flex items-center gap-2 mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase hover:text-[#0A0A0A] transition-colors mb-8"
-          >
-            ← Return to History
-          </Link>
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 mb-8 text-[10px] font-semibold tracking-[0.15em] uppercase text-[#8A8680]">
+            <Link href="/" className="hover:text-[#0A0A0A] transition-colors">Home</Link>
+            <ChevronRight size={12} />
+            <Link href="/account" className="hover:text-[#0A0A0A] transition-colors">Account</Link>
+            <ChevronRight size={12} />
+            <Link href="/orders" className="hover:text-[#0A0A0A] transition-colors">Orders</Link>
+            <ChevronRight size={12} />
+            <span className="text-[#0A0A0A] truncate max-w-[160px]">{order.order_number}</span>
+          </nav>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-4 mb-4">

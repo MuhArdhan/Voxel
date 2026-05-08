@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
+import { ChevronRight } from "lucide-react";
 
 const navItems = [
   { name: "Dashboard", href: "/account" },
@@ -54,12 +55,12 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
       />
 
       <div className="max-w-[1200px] mx-auto px-6 md:px-10 relative z-10">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase hover:text-[#0A0A0A] transition-colors mb-8"
-        >
-          ← Return to Store
-        </Link>
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 mb-8 text-[10px] font-semibold tracking-[0.15em] uppercase text-[#8A8680]">
+          <Link href="/" className="hover:text-[#0A0A0A] transition-colors">Home</Link>
+          <ChevronRight size={12} />
+          <span className="text-[#0A0A0A]">Account</span>
+        </nav>
         
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Sidebar */}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
+import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ChevronRight } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -69,6 +69,14 @@ export default function CartPage() {
     <div className="min-h-screen bg-[#F2F0EB] pt-28 pb-16 px-6 md:px-10">
       <Navbar />
       <div className="max-w-[1200px] mx-auto">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 mb-6 text-[10px] font-semibold tracking-[0.15em] uppercase text-[#8A8680]">
+          <Link href="/" className="hover:text-[#0A0A0A] transition-colors">Home</Link>
+          <ChevronRight size={12} />
+          <Link href="/shop" className="hover:text-[#0A0A0A] transition-colors">Shop</Link>
+          <ChevronRight size={12} />
+          <span className="text-[#0A0A0A]">Cart</span>
+        </nav>
         <h1 className="text-4xl md:text-5xl font-black text-[#0A0A0A] tracking-tight mb-10">
           Your Cart
         </h1>
