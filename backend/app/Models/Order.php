@@ -11,6 +11,15 @@ class Order extends Model
 {
     use SoftDeletes;
 
+    // Valid statuses: pending_payment → pending → paid → processing → shipped → completed / cancelled
+    const STATUS_PENDING_PAYMENT = 'pending_payment';
+    const STATUS_PENDING         = 'pending';
+    const STATUS_PAID            = 'paid';
+    const STATUS_PROCESSING      = 'processing';
+    const STATUS_SHIPPED         = 'shipped';
+    const STATUS_COMPLETED       = 'completed';
+    const STATUS_CANCELLED       = 'cancelled';
+
     protected $fillable = [
         'user_id',
         'order_number',

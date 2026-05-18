@@ -26,6 +26,9 @@ Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
 });
 
+// Midtrans Webhook (public – Midtrans posts here after payment)
+Route::post('payments/notification', [OrderController::class, 'notification']);
+
 // Products (public)
 Route::prefix('products')->group(function () {
     Route::get('/', [ProductController::class, 'index']);
@@ -65,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/checkout', [OrderController::class, 'checkout']);
         Route::get('/{order}', [OrderController::class, 'show']);
         Route::post('/{order}/cancel', [OrderController::class, 'cancel']);
+        Route::post('/{order}/verify-payment', [OrderController::class, 'verifyPayment']);
     });
 });
 
