@@ -13,14 +13,14 @@ import { ChevronRight } from "lucide-react";
 
 const statusConfig: Record<
   Order["status"],
-  { label: string; text: string; bg: string; border: string; glow: string }
+  { label: string; text: string; bg: string; border: string; glow: string; dot: string }
 > = {
-  pending: { label: "AWAITING PAYMENT", text: "text-[#FFB347]", bg: "bg-[#FFB347]/10", border: "border-[#FFB347]/30", glow: "from-[#FFB347]" },
-  paid: { label: "PAID", text: "text-[#00D4FF]", bg: "bg-[#00D4FF]/10", border: "border-[#00D4FF]/30", glow: "from-[#00D4FF]" },
-  processing: { label: "PROCESSING", text: "text-[#8B5CF6]", bg: "bg-[#8B5CF6]/10", border: "border-[#8B5CF6]/30", glow: "from-[#8B5CF6]" },
-  shipped: { label: "SHIPPED", text: "text-[#C8FF00]", bg: "bg-[#C8FF00]/10", border: "border-[#C8FF00]/30", glow: "from-[#C8FF00]" },
-  completed: { label: "COMPLETED", text: "text-[#10B981]", bg: "bg-[#10B981]/10", border: "border-[#10B981]/30", glow: "from-[#10B981]" },
-  cancelled: { label: "CANCELLED", text: "text-[#FF6B6B]", bg: "bg-[#FF6B6B]/10", border: "border-[#FF6B6B]/30", glow: "from-[#FF6B6B]" },
+  pending: { label: "AWAITING PAYMENT", text: "text-[#D97706]", bg: "bg-[#D97706]/10", border: "border-[#D97706]/30", glow: "from-[#D97706]", dot: "bg-[#D97706]" },
+  paid: { label: "PAID", text: "text-[#0284C7]", bg: "bg-[#0284C7]/10", border: "border-[#0284C7]/30", glow: "from-[#0284C7]", dot: "bg-[#0284C7]" },
+  processing: { label: "PROCESSING", text: "text-[#7C3AED]", bg: "bg-[#7C3AED]/10", border: "border-[#7C3AED]/30", glow: "from-[#7C3AED]", dot: "bg-[#7C3AED]" },
+  shipped: { label: "SHIPPED", text: "text-[#65A30D]", bg: "bg-[#65A30D]/10", border: "border-[#65A30D]/30", glow: "from-[#65A30D]", dot: "bg-[#65A30D]" },
+  completed: { label: "COMPLETED", text: "text-[#059669]", bg: "bg-[#059669]/10", border: "border-[#059669]/30", glow: "from-[#059669]", dot: "bg-[#059669]" },
+  cancelled: { label: "CANCELLED", text: "text-[#DC2626]", bg: "bg-[#DC2626]/10", border: "border-[#DC2626]/30", glow: "from-[#DC2626]", dot: "bg-[#DC2626]" },
 };
 
 const containerVariants = {
@@ -167,7 +167,7 @@ export default function OrdersPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#FF6B6B]/10 border border-[#FF6B6B]/30 text-[#FF6B6B] px-6 py-4 rounded-xl mb-8 font-mono text-sm tracking-wider"
+            className="bg-[#DC2626]/10 border border-[#DC2626]/30 text-[#DC2626] px-6 py-4 rounded-xl mb-8 font-mono text-sm tracking-wider"
           >
             ERR // {error}
           </motion.div>
@@ -244,7 +244,7 @@ export default function OrdersPage() {
                         <span
                           className={`inline-flex items-center gap-2 px-2.5 py-1 rounded text-[9px] font-bold tracking-[0.2em] uppercase border ${status.bg} ${status.text} ${status.border}`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${status.bg.replace('/10', '')} animate-pulse`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`} />
                           {status.label}
                         </span>
                       </div>
