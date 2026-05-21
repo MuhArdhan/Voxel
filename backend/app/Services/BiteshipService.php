@@ -65,14 +65,14 @@ class BiteshipService
             if ($weight <= 0) $weight = 500;
             
             return [
-                'name' => $item['name'] ?? 'Product',
+                'name'        => $item['name'] ?? 'Product',
                 'description' => $item['description'] ?? 'Item',
-                'value' => (int) ($item['price'] ?? 0),
-                'length' => 10,
-                'width' => 10,
-                'height' => 10,
-                'weight' => (int) $weight,
-                'quantity' => (int) ($item['quantity'] ?? 1),
+                'value'       => (int) ($item['price'] ?? 0),
+                'length'      => max(1, (int) ($item['length'] ?? 10)),
+                'width'       => max(1, (int) ($item['width'] ?? 10)),
+                'height'      => max(1, (int) ($item['height'] ?? 10)),
+                'weight'      => (int) $weight,
+                'quantity'    => (int) ($item['quantity'] ?? 1),
             ];
         }, $items);
 

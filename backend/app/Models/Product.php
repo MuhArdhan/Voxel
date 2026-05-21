@@ -26,15 +26,21 @@ class Product extends Model
         'is_active',
         'is_featured',
         'weight',
+        'length',
+        'width',
+        'height',
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
+        'price'          => 'decimal:2',
         'discount_price' => 'decimal:2',
         'is_limited_drop' => 'boolean',
-        'is_active' => 'boolean',
-        'is_featured' => 'boolean',
-        'weight' => 'integer',
+        'is_active'      => 'boolean',
+        'is_featured'    => 'boolean',
+        'weight'         => 'integer',
+        'length'         => 'integer',
+        'width'          => 'integer',
+        'height'         => 'integer',
     ];
 
     protected $appends = ['primary_image'];

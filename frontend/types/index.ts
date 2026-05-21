@@ -74,6 +74,9 @@ export interface Product {
   discount_price?: number;
   sku: string;
   weight?: number;
+  length?: number;
+  width?: number;
+  height?: number;
   is_limited_drop: boolean;
   is_active: boolean;
   is_featured: boolean;

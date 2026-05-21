@@ -42,7 +42,10 @@ class AdminProductController extends Controller
             'is_limited_drop' => ['boolean'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
-            'weight' => ['integer', 'min:0'],
+            'weight'          => ['integer', 'min:0'],
+            'length'          => ['integer', 'min:1'],
+            'width'           => ['integer', 'min:1'],
+            'height'          => ['integer', 'min:1'],
             // Variants
             'variants' => ['required', 'array', 'min:1'],
             'variants.*.size' => ['required', 'string'],
@@ -103,6 +106,9 @@ class AdminProductController extends Controller
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
             'weight' => ['integer', 'min:0'],
+            'length' => ['integer', 'min:1'],
+            'width'  => ['integer', 'min:1'],
+            'height' => ['integer', 'min:1'],
         ]);
 
         $product->update($validated);

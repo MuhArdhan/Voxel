@@ -65,6 +65,9 @@ export default function EditProductPage() {
         price: product.price,
         discount_price: product.discount_price || null,
         weight: product.weight || 0,
+        length: product.length || 10,
+        width: product.width || 10,
+        height: product.height || 10,
         is_active: product.is_active,
         is_limited_drop: product.is_limited_drop,
         is_featured: product.is_featured,
@@ -262,7 +265,22 @@ export default function EditProductPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-[#8A8680] uppercase">Weight (grams)</label>
-                  <input type="number" value={product.weight || 0} onChange={e => setProduct({...product, weight: parseInt(e.target.value)})} className="w-full px-4 py-2.5 bg-[#F2F0EB] border border-[#C8C4BC] rounded-xl text-sm" />
+                  <input type="number" value={product.weight ?? ""} onChange={e => setProduct({...product, weight: e.target.value === "" ? undefined : e.target.valueAsNumber})} className="w-full px-4 py-2.5 bg-[#F2F0EB] border border-[#C8C4BC] rounded-xl text-sm" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#8A8680] uppercase">Length (cm)</label>
+                  <input type="number" min="1" value={product.length ?? ""} onChange={e => setProduct({...product, length: e.target.value === "" ? undefined : e.target.valueAsNumber})} className="w-full px-4 py-2.5 bg-[#F2F0EB] border border-[#C8C4BC] rounded-xl text-sm" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#8A8680] uppercase">Width (cm)</label>
+                  <input type="number" min="1" value={product.width ?? ""} onChange={e => setProduct({...product, width: e.target.value === "" ? undefined : e.target.valueAsNumber})} className="w-full px-4 py-2.5 bg-[#F2F0EB] border border-[#C8C4BC] rounded-xl text-sm" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#8A8680] uppercase">Height (cm)</label>
+                  <input type="number" min="1" value={product.height ?? ""} onChange={e => setProduct({...product, height: e.target.value === "" ? undefined : e.target.valueAsNumber})} className="w-full px-4 py-2.5 bg-[#F2F0EB] border border-[#C8C4BC] rounded-xl text-sm" />
                 </div>
               </div>
 

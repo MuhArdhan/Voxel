@@ -84,9 +84,12 @@ class OrderController extends Controller
 
         $items = $cart->items->map(function ($item) {
             return [
-                'name' => $item->product->name,
-                'price' => $item->product->effective_price,
-                'weight' => $item->product->weight,
+                'name'     => $item->product->name,
+                'price'    => $item->product->effective_price,
+                'weight'   => $item->product->weight,
+                'length'   => $item->product->length,
+                'width'    => $item->product->width,
+                'height'   => $item->product->height,
                 'quantity' => $item->quantity,
             ];
         })->toArray();
