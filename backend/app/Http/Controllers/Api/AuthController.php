@@ -97,6 +97,10 @@ class AuthController extends Controller
             'name' => ['sometimes', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:20'],
             'address' => ['sometimes', 'nullable', 'string'],
+            'city' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'province' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'postal_code' => ['sometimes', 'nullable', 'string', 'max:10'],
+            'area_id' => ['sometimes', 'nullable', 'string', 'max:100'],
             'avatar' => ['sometimes', 'nullable', 'image', 'max:2048'],
         ]);
 

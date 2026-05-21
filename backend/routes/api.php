@@ -62,6 +62,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('change-password', [AuthController::class, 'changePassword']);
     });
 
+    // Shipping (Biteship)
+    Route::prefix('shipping')->group(function () {
+        Route::get('/areas', [OrderController::class, 'searchAreas']);
+        Route::post('/rates', [OrderController::class, 'getRates']);
+    });
+
     // Orders
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index']);

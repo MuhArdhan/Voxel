@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Services\MidtransService;
+use App\Services\BiteshipService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,10 @@ use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    public function __construct(protected MidtransService $midtrans) {}
+    public function __construct(
+        protected MidtransService $midtrans,
+        protected BiteshipService $biteship
+    ) {}
 
     // ─── User: List Orders ────────────────────────────────────────────────────
     public function index(Request $request): JsonResponse
@@ -50,6 +54,49 @@ class OrderController extends Controller
         $order->load(['items.product.images']);
 
         return response()->json($order);
+    }
+
+    // ─── Shipping: Biteship ───────────────────────────────────────────────────
+    public function searchAreas(Request $request): JsonResponse
+    {
+        $query = $request->input('search');
+        if (!$query) {
+            return response()->json([]);
+        }
+
+        $areas = $this->biteship->searchAreas($query);
+        return response()->json($areas);
+    }
+
+    public function getRates(Request $request): JsonResponse
+    {
+        $request->validate([
+            'destination_area_id' => 'required|string'
+        ]);
+
+        $cart = Cart::where('user_id', $request->user()->id)
+            ->with(['items.product'])
+            ->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return response()->json(['message' => 'Cart is empty'], 422);
+        }
+
+        $items = $cart->items->map(function ($item) {
+            return [
+                'name' => $item->product->name,
+                'price' => $item->product->effective_price,
+                'weight' => $item->product->weight,
+                'quantity' => $item->quantity,
+            ];
+        })->toArray();
+
+        try {
+            $rates = $this->biteship->getRates($request->input('destination_area_id'), $items);
+            return response()->json($rates);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     // ─── User: Checkout → Create Order + Get Snap Token ──────────────────────

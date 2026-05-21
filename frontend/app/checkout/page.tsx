@@ -7,12 +7,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Check, ChevronRight, Lock, MapPin, Truck,
-  CreditCard, AlertCircle, Loader2,
+  CreditCard, AlertCircle, Loader2, Search
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { checkoutSchema, CheckoutFormData, CheckoutPayload } from "@/types";
-import { apiPost, STORAGE_URL } from "@/lib/api";
+import { apiPost, apiGet, STORAGE_URL } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import { Input }    from "@/components/ui/input";
 import { Label }    from "@/components/ui/label";
@@ -39,13 +39,6 @@ const STEPS = [
   { id: 3, name: "Payment",  Icon: CreditCard },
 ];
 
-const COURIERS = [
-  { id: "jne",      name: "JNE",      services: [{ id: "reg", name: "REG",         price: 15000 }, { id: "yes",  name: "YES",      price: 25000 }] },
-  { id: "sicepat",  name: "SiCepat",  services: [{ id: "reg", name: "SiCepat REG", price: 14000 }, { id: "best", name: "BEST",     price: 22000 }] },
-  { id: "anteraja", name: "Anteraja", services: [{ id: "reg", name: "Regular",      price: 13000 }, { id: "nd",   name: "Next Day", price: 20000 }] },
-];
-
-// Load Midtrans Snap script via DOM (no next/script needed)
 function loadSnapScript(clientKey: string, onLoad: () => void) {
   if (typeof window === "undefined") return;
   if (window.snap) { onLoad(); return; }
@@ -74,8 +67,6 @@ export default function CheckoutPage() {
   const { cart, clearCart, isLoading: cartLoading }  = useCart();
 
   const [step,            setStep]            = useState(1);
-  const [courier,         setCourier]         = useState(COURIERS[0].id);
-  const [service,         setService]         = useState(COURIERS[0].services[0]);
   const [submitting,      setSubmitting]      = useState(false);
   const [error,           setError]           = useState<string | null>(null);
   const [done,            setDone]            = useState(false);
@@ -85,11 +76,25 @@ export default function CheckoutPage() {
   const orderIdRef     = useRef<number | null>(null);
   const embedDone      = useRef(false);
 
+  // --- Shipping & Area States ---
+  const [areas, setAreas] = useState<any[]>([]);
+  const [areaSearch, setAreaSearch] = useState("");
+  const [isSearchingArea, setIsSearchingArea] = useState(false);
+  const [showAreaDropdown, setShowAreaDropdown] = useState(false);
+  const [selectedAreaLabel, setSelectedAreaLabel] = useState("");
+  
+  const [dynamicRates, setDynamicRates] = useState<any[]>([]);
+  const [isLoadingRates, setIsLoadingRates] = useState(false);
+  
+  const [selectedCourier, setSelectedCourier] = useState<string>("");
+  const [selectedService, setSelectedService] = useState<any>(null);
+
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       shipping_name: "", shipping_phone: "", shipping_address: "",
       shipping_city: "", shipping_province: "", shipping_postal_code: "", notes: "",
+      destination_area_id: "",
     },
   });
 
@@ -109,9 +114,50 @@ export default function CheckoutPage() {
         shipping_province:    user.province    || "",
         shipping_postal_code: user.postal_code || "",
         notes: "",
+        destination_area_id: user.area_id || "",
       });
+      
+      if (user.city && user.province && user.postal_code) {
+        const label = `${user.city}, ${user.province}, ${user.postal_code}`;
+        setSelectedAreaLabel(label);
+        setAreaSearch(label);
+      }
     }
   }, [user, form]);
+
+  /* ── area search debounce ── */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (areaSearch.length > 2 && areaSearch !== selectedAreaLabel) {
+        setIsSearchingArea(true);
+        apiGet<any[]>('/shipping/areas', { search: areaSearch })
+          .then((data) => {
+            setAreas(data);
+            setShowAreaDropdown(true);
+          })
+          .catch((e) => console.error(e))
+          .finally(() => setIsSearchingArea(false));
+      } else {
+        setAreas([]);
+        setShowAreaDropdown(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [areaSearch, selectedAreaLabel]);
+
+  const selectArea = (area: any) => {
+    form.setValue("shipping_city", area.administrative_division_level_2_name);
+    form.setValue("shipping_province", area.administrative_division_level_1_name);
+    form.setValue("shipping_postal_code", String(area.postal_code));
+    form.setValue("destination_area_id", area.id);
+    
+    const label = `${area.name}, ${area.administrative_division_level_2_name}, ${area.postal_code}`;
+    setSelectedAreaLabel(label);
+    setAreaSearch(label);
+    setShowAreaDropdown(false);
+    form.clearErrors("destination_area_id");
+  };
 
   /* ── load snap script when clientKey arrives ── */
   const [clientKey, setClientKey] = useState("");
@@ -152,7 +198,7 @@ export default function CheckoutPage() {
             router.push(`/orders/${orderIdRef.current}?status=pending`);
           },
           onError: () => {
-            setError("Pembayaran gagal. Silakan coba lagi.");
+            setError("Payment failed. Please try again.");
             embedDone.current = false;
             setSnapEmbedded(false);
           },
@@ -165,19 +211,29 @@ export default function CheckoutPage() {
       } else if (tries < 30) {
         setTimeout(run, 100);
       } else {
-        setError("Gagal memuat antarmuka pembayaran. Coba refresh halaman.");
+        setError("Failed to load payment interface. Please refresh the page.");
       }
     };
-    setTimeout(run, 200); // wait for React to render step-3 div
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setTimeout(run, 200);
   }, [snapToken, snapReady, step]);
 
   /* ── navigation helpers ── */
   const nextStep = async () => {
     if (step === 1) {
       const ok = await form.trigger();
-      if (ok) setStep(2);
+      if (!form.getValues('destination_area_id')) {
+          form.setError("destination_area_id", { type: "manual", message: "Please select a valid area from the dropdown" });
+          return;
+      }
+      if (ok) {
+        setStep(2);
+        fetchRates();
+      }
     } else if (step === 2) {
+      if (!selectedService) {
+        setError("Please select a shipping service.");
+        return;
+      }
       await goToPayment();
     }
   };
@@ -193,6 +249,26 @@ export default function CheckoutPage() {
     }
   };
 
+  const fetchRates = async () => {
+    setIsLoadingRates(true);
+    setError(null);
+    try {
+        const res = await apiPost('/shipping/rates', {
+            destination_area_id: form.getValues('destination_area_id')
+        });
+        setDynamicRates(res);
+        // Auto-select first available courier/service if any
+        if (res.length > 0) {
+            setSelectedCourier(res[0].courier_code);
+            setSelectedService(res[0]);
+        }
+    } catch (err: any) {
+        setError(err.response?.data?.message || "Failed to fetch shipping rates. Please try again.");
+    } finally {
+        setIsLoadingRates(false);
+    }
+  };
+
   const goToPayment = async () => {
     setSubmitting(true);
     setError(null);
@@ -201,9 +277,9 @@ export default function CheckoutPage() {
       const values = form.getValues();
       const payload: CheckoutPayload = {
         ...values,
-        courier,
-        courier_service: service.id,
-        shipping_cost:   service.price,
+        courier: selectedCourier,
+        courier_service: selectedService.courier_service_code,
+        shipping_cost: selectedService.price,
       };
       const res = await apiPost("/orders/checkout", payload);
       orderIdRef.current = res.order?.id ?? null;
@@ -211,7 +287,7 @@ export default function CheckoutPage() {
       setSnapToken(res.snap_token);
       setStep(3);
     } catch (e: any) {
-      setError(e.response?.data?.message || "Terjadi kesalahan. Coba lagi.");
+      setError(e.response?.data?.message || "An error occurred. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -223,7 +299,7 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-[#F2F0EB] pt-28 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0A0A0A] mx-auto mb-4" />
-          {done && <p className="text-[#4A4845] text-sm">Mengarahkan ke pesanan Anda...</p>}
+          {done && <p className="text-[#4A4845] text-sm">Redirecting to your order...</p>}
         </div>
       </div>
     );
@@ -242,7 +318,22 @@ export default function CheckoutPage() {
   }
 
   const subtotal = Number(cart.total);
-  const total    = subtotal + service.price;
+  const total    = subtotal + (selectedService?.price || 0);
+
+  // Group rates by courier for Step 2 UI
+  const couriersList = dynamicRates.reduce((acc: any[], rate: any) => {
+    const existing = acc.find(c => c.id === rate.courier_code);
+    if (existing) {
+        existing.services.push(rate);
+    } else {
+        acc.push({
+            id: rate.courier_code,
+            name: rate.courier_name,
+            services: [rate]
+        });
+    }
+    return acc;
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F2F0EB] pt-24 pb-16 px-6 md:px-10">
@@ -288,25 +379,84 @@ export default function CheckoutPage() {
                     >
                       <h2 className="text-2xl font-black text-[#0A0A0A] border-b border-[#C8C4BC] pb-4">1. Shipping Address</h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {[
-                          { id: "shipping_name",        label: "Full Name",       ph: "John Doe",           span: false },
-                          { id: "shipping_phone",       label: "Phone Number",    ph: "08123456789",        span: false },
-                          { id: "shipping_address",     label: "Complete Address",ph: "Street, No...",      span: true,  textarea: true },
-                          { id: "shipping_city",        label: "City",            ph: "",                   span: false },
-                          { id: "shipping_province",    label: "Province",        ph: "",                   span: false },
-                          { id: "shipping_postal_code", label: "Postal Code",     ph: "",                   span: false },
-                        ].map(f => (
-                          <div key={f.id} className={`space-y-2 ${f.span ? "sm:col-span-2" : ""}`}>
-                            <Label htmlFor={f.id}>{f.label}</Label>
-                            {f.textarea
-                              ? <Textarea id={f.id} {...form.register(f.id as any)} placeholder={f.ph} className="bg-[#F2F0EB] border-[#C8C4BC] min-h-[90px]" />
-                              : <Input   id={f.id} {...form.register(f.id as any)} placeholder={f.ph} className="bg-[#F2F0EB] border-[#C8C4BC]" />
-                            }
-                            {(form.formState.errors as any)[f.id] && (
-                              <p className="text-red-500 text-xs">{(form.formState.errors as any)[f.id]?.message}</p>
+                        <div className="space-y-2">
+                          <Label htmlFor="shipping_name">Full Name</Label>
+                          <Input id="shipping_name" {...form.register("shipping_name")} placeholder="John Doe" className="bg-[#F2F0EB] border-[#C8C4BC]" />
+                          {form.formState.errors.shipping_name && (
+                            <p className="text-red-500 text-xs">{form.formState.errors.shipping_name.message}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="shipping_phone">Phone Number</Label>
+                          <Input id="shipping_phone" {...form.register("shipping_phone")} placeholder="08123456789" className="bg-[#F2F0EB] border-[#C8C4BC]" />
+                          {form.formState.errors.shipping_phone && (
+                            <p className="text-red-500 text-xs">{form.formState.errors.shipping_phone.message}</p>
+                          )}
+                        </div>
+                        <div className="space-y-2 sm:col-span-2">
+                          <Label htmlFor="shipping_address">Complete Address</Label>
+                          <Textarea id="shipping_address" {...form.register("shipping_address")} placeholder="Street, No..." className="bg-[#F2F0EB] border-[#C8C4BC] min-h-[90px]" />
+                          {form.formState.errors.shipping_address && (
+                            <p className="text-red-500 text-xs">{form.formState.errors.shipping_address.message}</p>
+                          )}
+                        </div>
+                        
+                        {/* Area Search Autocomplete */}
+                        <div className="space-y-2 sm:col-span-2 relative">
+                          <Label htmlFor="area_search">District / City / Postal Code</Label>
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8680]" size={18} />
+                            <Input 
+                                id="area_search" 
+                                value={areaSearch}
+                                onChange={(e) => setAreaSearch(e.target.value)}
+                                placeholder="e.g. Kebayoran Baru or 12110" 
+                                className="bg-[#F2F0EB] border-[#C8C4BC] pl-10" 
+                                autoComplete="off"
+                            />
+                            {isSearchingArea && (
+                                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C1A1A] animate-spin" size={18} />
                             )}
                           </div>
-                        ))}
+                          {form.formState.errors.destination_area_id && (
+                            <p className="text-red-500 text-xs">{form.formState.errors.destination_area_id.message}</p>
+                          )}
+
+                          <AnimatePresence>
+                            {showAreaDropdown && areas.length > 0 && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="absolute z-20 w-full mt-2 bg-[#F2F0EB] border border-[#C8C4BC] rounded-xl shadow-2xl max-h-64 overflow-y-auto overflow-x-hidden"
+                                >
+                                    {areas.map((area) => (
+                                        <div 
+                                            key={area.id} 
+                                            className="px-5 py-3 hover:bg-[#E8E5DF] cursor-pointer border-b border-[#C8C4BC]/40 last:border-0 transition-colors flex flex-col gap-0.5"
+                                            onClick={() => selectArea(area)}
+                                        >
+                                            <p className="font-bold text-sm text-[#0A0A0A]">{area.name}</p>
+                                            <p className="text-[11px] text-[#8A8680] uppercase tracking-wider mono">
+                                                {area.administrative_division_level_2_name}, {area.administrative_division_level_1_name} {area.postal_code}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </motion.div>
+                            )}
+                            {showAreaDropdown && areaSearch.length > 2 && areas.length === 0 && !isSearchingArea && areaSearch !== selectedAreaLabel && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="absolute z-20 w-full mt-2 bg-[#F2F0EB] border border-[#C8C4BC] rounded-xl shadow-xl p-6 text-center"
+                                >
+                                    <p className="text-sm font-medium text-[#8A8680]">No areas found.</p>
+                                    <p className="text-[10px] text-[#8A8680]/60 uppercase tracking-widest mono mt-1">Try another keyword</p>
+                                </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </div>
                       <div className="pt-6 flex justify-end">
                         <Button type="button" onClick={nextStep} className="bg-[#0A0A0A] text-[#F2F0EB] rounded-full px-8 py-6 flex items-center gap-2 hover:bg-[#5C1A1A]">
@@ -324,34 +474,51 @@ export default function CheckoutPage() {
                     >
                       <h2 className="text-2xl font-black text-[#0A0A0A] border-b border-[#C8C4BC] pb-4">2. Shipping Method</h2>
                       <div className="space-y-8">
-                        <div className="space-y-4">
-                          <Label className="text-base text-[#4A4845]">Select Courier</Label>
-                          <div className="grid grid-cols-3 gap-4">
-                            {COURIERS.map(c => (
-                              <div key={c.id} onClick={() => { setCourier(c.id); setService(c.services[0]); }}
-                                className={`cursor-pointer border-2 rounded-2xl p-4 text-center transition-all
-                                  ${courier === c.id ? "border-[#0A0A0A] bg-[#0A0A0A] text-[#F2F0EB]" : "border-[#C8C4BC] bg-[#F2F0EB] hover:border-[#8A8680]"}`}>
-                                <span className="font-bold">{c.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          <Label className="text-base text-[#4A4845]">Select Service</Label>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {COURIERS.find(c => c.id === courier)?.services.map(sv => (
-                              <div key={sv.id} onClick={() => setService(sv)}
-                                className={`cursor-pointer border-2 rounded-2xl p-4 flex justify-between items-center transition-all
-                                  ${service.id === sv.id ? "border-[#5C1A1A]" : "border-[#C8C4BC] hover:border-[#8A8680]"} bg-[#F2F0EB]`}>
-                                <div>
-                                  <span className="font-bold block">{sv.name}</span>
-                                  <span className="text-sm text-[#8A8680]">Estimasi 2–3 hari</span>
+                        {isLoadingRates ? (
+                            <div className="flex flex-col items-center justify-center py-10 gap-4">
+                                <Loader2 size={32} className="animate-spin text-[#5C1A1A]" />
+                                <p className="text-[#8A8680] text-sm">Calculating best rates...</p>
+                            </div>
+                        ) : couriersList.length > 0 ? (
+                            <>
+                                <div className="space-y-4">
+                                <Label className="text-base text-[#4A4845]">Select Courier</Label>
+                                <div className="grid grid-cols-3 gap-4">
+                                    {couriersList.map((c) => (
+                                    <div key={c.id} onClick={() => { setSelectedCourier(c.id); setSelectedService(c.services[0]); }}
+                                        className={`cursor-pointer border-2 rounded-2xl p-4 text-center transition-all
+                                        ${selectedCourier === c.id ? "border-[#0A0A0A] bg-[#0A0A0A] text-[#F2F0EB]" : "border-[#C8C4BC] bg-[#F2F0EB] hover:border-[#8A8680]"}`}>
+                                        <span className="font-bold">{c.name}</span>
+                                    </div>
+                                    ))}
                                 </div>
-                                <span className="font-bold mono">{formatPrice(sv.price)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                                </div>
+                                <div className="space-y-4">
+                                <Label className="text-base text-[#4A4845]">Select Service</Label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {couriersList.find((c) => c.id === selectedCourier)?.services.map((sv: any) => (
+                                    <div key={sv.courier_service_code} onClick={() => setSelectedService(sv)}
+                                        className={`cursor-pointer border-2 rounded-2xl p-4 flex justify-between items-center transition-all
+                                        ${selectedService?.courier_service_code === sv.courier_service_code ? "border-[#5C1A1A]" : "border-[#C8C4BC] hover:border-[#8A8680]"} bg-[#F2F0EB]`}>
+                                        <div>
+                                        <span className="font-bold block">{sv.courier_service_name}</span>
+                                        <span className="text-sm text-[#8A8680]">
+                                          {sv.shipment_duration_range
+                                            ? `${sv.shipment_duration_range} ${sv.shipment_duration_unit}`
+                                            : "Estimated delivery"}
+                                        </span>
+                                        </div>
+                                        <span className="font-bold mono">{formatPrice(sv.price)}</span>
+                                    </div>
+                                    ))}
+                                </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center py-8">
+                                <p className="text-[#8A8680]">No shipping options available for this destination.</p>
+                            </div>
+                        )}
                         <div className="space-y-2">
                           <Label htmlFor="notes">Order Notes (Optional)</Label>
                           <Textarea id="notes" {...form.register("notes")} className="bg-[#F2F0EB] border-[#C8C4BC]" placeholder="Any special requests..." />
@@ -367,9 +534,9 @@ export default function CheckoutPage() {
 
                       <div className="pt-6 flex justify-between border-t border-[#C8C4BC] mt-8">
                         <Button type="button" variant="outline" onClick={prevStep} className="border-[#C8C4BC] rounded-full px-8 py-6">Back</Button>
-                        <Button type="button" onClick={nextStep} disabled={submitting}
+                        <Button type="button" onClick={nextStep} disabled={submitting || isLoadingRates || !selectedService}
                           className="bg-[#0A0A0A] text-[#F2F0EB] rounded-full px-8 py-6 flex items-center gap-2 hover:bg-[#5C1A1A] disabled:opacity-60">
-                          {submitting ? <><Loader2 size={18} className="animate-spin" /> Memproses...</> : <>Lanjut ke Pembayaran <ChevronRight size={18} /></>}
+                          {submitting ? <><Loader2 size={18} className="animate-spin" /> Processing...</> : <>Proceed to Payment <ChevronRight size={18} /></>}
                         </Button>
                       </div>
                     </motion.div>
@@ -381,12 +548,12 @@ export default function CheckoutPage() {
                       initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
                       className="space-y-6"
                     >
-                      <h2 className="text-2xl font-black text-[#0A0A0A] border-b border-[#C8C4BC] pb-4">3. Pilih Pembayaran</h2>
+                      <h2 className="text-2xl font-black text-[#0A0A0A] border-b border-[#C8C4BC] pb-4">3. Payment Selection</h2>
 
                       {/* summary strip */}
                       <div className="bg-[#F2F0EB] border border-[#C8C4BC] rounded-2xl p-4 text-sm text-[#4A4845] flex flex-wrap gap-x-6 gap-y-1">
-                        <span><strong className="text-[#0A0A0A]">Alamat:</strong> {form.getValues("shipping_city")}, {form.getValues("shipping_province")}</span>
-                        <span><strong className="text-[#0A0A0A]">Kurir:</strong> {COURIERS.find(c => c.id === courier)?.name} – {service.name}</span>
+                        <span><strong className="text-[#0A0A0A]">Address:</strong> {form.getValues("shipping_city")}, {form.getValues("shipping_province")}</span>
+                        <span><strong className="text-[#0A0A0A]">Courier:</strong> {selectedService?.courier_name} – {selectedService?.courier_service_name}</span>
                         <span><strong className="text-[#0A0A0A]">Total:</strong> {formatPrice(total)}</span>
                       </div>
 
@@ -395,7 +562,7 @@ export default function CheckoutPage() {
                         {!snapEmbedded && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                             <Loader2 size={36} className="animate-spin text-[#5C1A1A]" />
-                            <p className="text-sm text-[#4A4845] font-medium">Memuat pilihan pembayaran...</p>
+                            <p className="text-sm text-[#4A4845] font-medium">Loading payment options...</p>
                           </div>
                         )}
                         <div id="snap-container" className="w-full" />
@@ -410,7 +577,7 @@ export default function CheckoutPage() {
 
                       <div className="pt-4 border-t border-[#C8C4BC]">
                         <Button type="button" variant="outline" onClick={prevStep} className="border-[#C8C4BC] rounded-full px-8 py-6">
-                          Kembali
+                          Back
                         </Button>
                       </div>
                     </motion.div>
@@ -453,13 +620,13 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-[#8A8680]">
                   <span>Shipping</span>
                   <span className="mono text-[#F2F0EB]">
-                    {step > 1 ? formatPrice(service.price) : "—"}
+                    {step > 1 && selectedService ? formatPrice(selectedService.price) : "—"}
                   </span>
                 </div>
               </div>
               <div className="flex justify-between items-end pt-6 border-t border-[#2A2A2A]">
                 <span className="font-bold text-[#8A8680]">Total</span>
-                <span className="mono text-2xl font-black">{formatPrice(step > 1 ? total : subtotal)}</span>
+                <span className="mono text-2xl font-black">{formatPrice(step > 1 && selectedService ? total : subtotal)}</span>
               </div>
             </div>
           </div>

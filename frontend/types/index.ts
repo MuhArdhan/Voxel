@@ -11,6 +11,10 @@ export interface User {
   email: string;
   phone?: string;
   address?: string;
+  city?: string;
+  province?: string;
+  postal_code?: string;
+  area_id?: string;
   avatar?: string;
   role: "user" | "admin";
   is_blocked: boolean;
@@ -177,6 +181,7 @@ export interface CheckoutPayload {
   shipping_city: string;
   shipping_province: string;
   shipping_postal_code: string;
+  destination_area_id?: string;
   courier: string;
   courier_service: string;
   shipping_cost: number;
@@ -184,12 +189,13 @@ export interface CheckoutPayload {
 }
 
 export const checkoutSchema = z.object({
-  shipping_name: z.string().min(3, "Nama lengkap harus diisi (min 3 karakter)"),
-  shipping_phone: z.string().min(10, "Nomor HP tidak valid").regex(/^[0-9+]+$/, "Hanya angka yang diperbolehkan"),
-  shipping_address: z.string().min(10, "Alamat lengkap harus diisi secara detail"),
-  shipping_city: z.string().min(3, "Kota harus diisi"),
-  shipping_province: z.string().min(3, "Provinsi harus diisi"),
-  shipping_postal_code: z.string().min(4, "Kode pos tidak valid"),
+  shipping_name: z.string().min(3, "Full name is required (min 3 chars)"),
+  shipping_phone: z.string().min(10, "Invalid phone number").regex(/^[0-9+]+$/, "Only numbers are allowed"),
+  shipping_address: z.string().min(10, "Complete address must be filled in detail"),
+  shipping_city: z.string().min(3, "City must be filled"),
+  shipping_province: z.string().min(3, "Province must be filled"),
+  shipping_postal_code: z.string().min(4, "Postal code is invalid"),
+  destination_area_id: z.string().optional(),
   notes: z.string().optional(),
 });
 
