@@ -163,6 +163,7 @@ export interface Order {
   shipping_city: string;
   shipping_province: string;
   shipping_postal_code: string;
+  destination_area_id?: string;
   courier: string;
   courier_service: string;
   tracking_number?: string;
@@ -250,4 +251,35 @@ export interface AuthResponse {
   user: User;
   token: string;
   token_type: string;
+}
+
+// ----- Biteship Tracking -----
+export interface BiteshipTrackingHistory {
+  note: string;
+  status: string;
+  updated_at: string;
+  service_type?: string;
+}
+
+export interface BiteshipTracking {
+  success: boolean;
+  object: string;
+  id?: string;
+  waybill_id?: string;
+  courier?: {
+    company: string;
+    name: string;
+    phone?: string;
+  };
+  origin?: {
+    contact_name?: string;
+    address?: string;
+  };
+  destination?: {
+    contact_name?: string;
+    address?: string;
+  };
+  history: BiteshipTrackingHistory[];
+  status: string;
+  link?: string;
 }

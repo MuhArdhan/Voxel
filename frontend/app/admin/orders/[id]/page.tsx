@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet, apiPut, STORAGE_URL } from "@/lib/api";
+import { apiGet, apiPut, apiPost, STORAGE_URL } from "@/lib/api";
 import { type Order } from "@/types";
 import { formatPrice, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, User, MapPin, CreditCard, Package, Save } from "lucide-react";
+import { ArrowLeft, User, MapPin, CreditCard, Package, Save, Truck } from "lucide-react";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useParams } from "next/navigation";
 
@@ -30,6 +30,7 @@ export default function AdminOrderDetailPage() {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isShipping, setIsShipping] = useState(false);
 
   useEffect(() => {
     async function fetchOrder() {
@@ -65,6 +66,26 @@ export default function AdminOrderDetailPage() {
       setMessage({ type: "error", text: err.response?.data?.message || "Failed to update status." });
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleShipOrder = async () => {
+    if (!order) return;
+    setIsShipping(true);
+    setMessage(null);
+    try {
+      const res = await apiPost<{ message: string; tracking_number: string; order: Order }>(
+        `/admin/orders/${id}/ship`,
+        {}
+      );
+      setOrder(res.order);
+      setStatus(res.order.status);
+      setTrackingNumber(res.tracking_number);
+      setMessage({ type: "success", text: `Shipment created! Tracking: ${res.tracking_number}` });
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.response?.data?.message || "Failed to create shipment." });
+    } finally {
+      setIsShipping(false);
     }
   };
 
@@ -258,6 +279,20 @@ export default function AdminOrderDetailPage() {
         <div className="space-y-6">
           <div className="bg-white border border-[#C8C4BC] rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-[#0A0A0A] mb-6 border-b border-[#C8C4BC]/60 pb-4">Manage Status</h2>
+
+            {(order.status === 'paid' || order.status === 'processing') && !order.tracking_number && (
+              <div className="mb-4">
+                <button
+                  onClick={handleShipOrder}
+                  disabled={isShipping}
+                  className="w-full flex items-center justify-center gap-2 bg-[#06B6D4] text-white rounded-xl px-4 py-3 text-sm font-bold hover:bg-[#0891B2] disabled:opacity-50 transition-colors"
+                >
+                  <Truck size={14} />
+                  {isShipping ? "CREATING SHIPMENT..." : "PROCESS SHIPMENT (Biteship)"}
+                </button>
+                <p className="text-[10px] text-[#8A8680] text-center mt-2 uppercase tracking-wider">Creates order in Biteship & gets waybill</p>
+              </div>
+            )}
             
             <form onSubmit={handleUpdateStatus} className="space-y-4">
               {message && (

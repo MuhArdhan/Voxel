@@ -112,6 +112,7 @@ class OrderController extends Controller
             'shipping_city'        => ['required', 'string', 'max:100'],
             'shipping_province'    => ['required', 'string', 'max:100'],
             'shipping_postal_code' => ['required', 'string', 'max:10'],
+            'destination_area_id'  => ['nullable', 'string'],
             'courier'              => ['required', 'string'],
             'courier_service'      => ['required', 'string'],
             'shipping_cost'        => ['required', 'numeric', 'min:0'],
@@ -158,6 +159,7 @@ class OrderController extends Controller
                     'shipping_city'        => $validated['shipping_city'],
                     'shipping_province'    => $validated['shipping_province'],
                     'shipping_postal_code' => $validated['shipping_postal_code'],
+                    'destination_area_id'  => $validated['destination_area_id'] ?? null,
                     'courier'              => $validated['courier'],
                     'courier_service'      => $validated['courier_service'],
                     'notes'                => $validated['notes'] ?? null,
@@ -231,20 +233,26 @@ class OrderController extends Controller
 
             if ($transactionStatus === 'capture') {
                 if ($fraudStatus === 'challenge') {
-                    $order->update(['status' => Order::STATUS_PENDING]);
+                    if (in_array($order->status, [Order::STATUS_PENDING_PAYMENT, Order::STATUS_PENDING])) {
+                        $order->update(['status' => Order::STATUS_PENDING]);
+                    }
                 } elseif ($fraudStatus === 'accept') {
+                    if (in_array($order->status, [Order::STATUS_PENDING_PAYMENT, Order::STATUS_PENDING])) {
+                        $order->update([
+                            'status'         => Order::STATUS_PAID,
+                            'payment_method' => $paymentType,
+                            'paid_at'        => now(),
+                        ]);
+                    }
+                }
+            } elseif ($transactionStatus === 'settlement') {
+                if (in_array($order->status, [Order::STATUS_PENDING_PAYMENT, Order::STATUS_PENDING])) {
                     $order->update([
                         'status'         => Order::STATUS_PAID,
                         'payment_method' => $paymentType,
                         'paid_at'        => now(),
                     ]);
                 }
-            } elseif ($transactionStatus === 'settlement') {
-                $order->update([
-                    'status'         => Order::STATUS_PAID,
-                    'payment_method' => $paymentType,
-                    'paid_at'        => now(),
-                ]);
             } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
                 $order->update(['status' => Order::STATUS_CANCELLED]);
             } elseif ($transactionStatus === 'pending') {
@@ -283,8 +291,13 @@ class OrderController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($order->status === Order::STATUS_PAID) {
-            return response()->json(['message' => 'Already paid', 'order' => $order->fresh()]);
+        if (in_array($order->status, [
+            Order::STATUS_PAID,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_SHIPPED,
+            Order::STATUS_COMPLETED
+        ])) {
+            return response()->json(['message' => 'Already paid or processed', 'order' => $order->fresh()]);
         }
 
         $paymentType = null;
@@ -318,5 +331,23 @@ class OrderController extends Controller
         Log::info("verifyPayment: Order [{$order->order_number}] marked as PAID.");
 
         return response()->json(['message' => 'Payment verified', 'order' => $order->fresh()]);
+    }
+
+    public function tracking(Request $request, Order $order): JsonResponse
+    {
+        if ($order->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if (! $order->tracking_number) {
+            return response()->json(['message' => 'No tracking number available for this order.'], 404);
+        }
+
+        try {
+            $tracking = $this->biteship->getTracking($order->tracking_number, $order->courier);
+            return response()->json($tracking);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 }

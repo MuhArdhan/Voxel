@@ -75,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{order}', [OrderController::class, 'show']);
         Route::post('/{order}/cancel', [OrderController::class, 'cancel']);
         Route::post('/{order}/verify-payment', [OrderController::class, 'verifyPayment']);
+        Route::get('/{order}/tracking', [OrderController::class, 'tracking']);
     });
 });
 
@@ -112,6 +113,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
         Route::get('/', [AdminOrderController::class, 'index']);
         Route::get('/{order}', [AdminOrderController::class, 'show']);
         Route::put('/{order}/status', [AdminOrderController::class, 'updateStatus']);
+        Route::post('/{order}/ship', [AdminOrderController::class, 'shipOrder']);
     });
 
     // Users

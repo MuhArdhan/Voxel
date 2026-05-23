@@ -36,9 +36,13 @@ return [
     ],
 
     'biteship' => [
-        'api_key' => env('BITESHIP_API_KEY'),
-        'base_url' => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
-        'origin_area_id' => env('BITESHIP_ORIGIN_AREA_ID'),
+        'api_key'         => env('BITESHIP_API_KEY'),
+        'base_url'        => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
+        'origin_area_id'  => env('BITESHIP_ORIGIN_AREA_ID'),
+        'shipper_name'    => env('BITESHIP_SHIPPER_NAME', 'VOXEL Store'),
+        'shipper_phone'   => env('BITESHIP_SHIPPER_PHONE'),
+        'shipper_email'   => env('BITESHIP_SHIPPER_EMAIL'),
+        'origin_address'  => env('BITESHIP_ORIGIN_ADDRESS'),
     ],
 
 ];

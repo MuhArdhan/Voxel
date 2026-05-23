@@ -33,6 +33,7 @@ class Order extends Model
         'shipping_city',
         'shipping_province',
         'shipping_postal_code',
+        'destination_area_id',
         'courier',
         'courier_service',
         'tracking_number',

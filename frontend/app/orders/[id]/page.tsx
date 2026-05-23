@@ -88,7 +88,7 @@ export default function OrderDetailPage() {
     try {
       setIsCancelling(true);
       await apiPost(`/orders/${order.id}/cancel`);
-      await fetchOrder(); // Refresh order data
+      await fetchOrder();
     } catch (err) {
       alert(getErrorMessage(err));
     } finally {
@@ -366,18 +366,17 @@ export default function OrderDetailPage() {
                     <p className="mono text-sm font-bold text-[#0A0A0A] mb-2 inline-block">
                       {order.tracking_number}
                     </p>
-                    <a
-                      href={`https://cekresi.com/?noresi=${order.tracking_number}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block mono text-[9px] font-bold text-[#00D4FF] hover:text-[#0A0A0A] uppercase tracking-[0.1em] transition-colors"
+                    <Link
+                      href={`/orders/${order.id}/tracking`}
+                      className="inline-flex items-center justify-center gap-2 border border-[#0A0A0A] text-[#0A0A0A] px-4 py-2 rounded-lg mono text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[#0A0A0A] hover:text-[#F2F0EB] transition-colors w-full sm:w-auto mt-3"
                     >
-                      Initialize Tracking →
-                    </a>
+                      Track Shipment →
+                    </Link>
                   </div>
                 )}
               </div>
             </div>
+
           </motion.div>
 
           {/* Right Column — Summary & Actions */}
