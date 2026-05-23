@@ -38,6 +38,15 @@ export default function EditProductPage() {
     }
   };
 
+  const refreshNestedData = async () => {
+    try {
+      const res = await apiGet<Product>(`/admin/products/${id}`);
+      setProduct(prev => prev ? { ...prev, images: res.images, variants: res.variants } : null);
+    } catch (err) {
+      console.error("Failed to refresh nested data", err);
+    }
+  };
+
   useEffect(() => {
     async function init() {
       try {
@@ -88,7 +97,7 @@ export default function EditProductPage() {
     try {
       await apiPost(`/admin/products/${id}/variants`, newVariant);
       setNewVariant({ size: "M", color: "", stock: 0, additional_price: 0 });
-      fetchProduct();
+      refreshNestedData();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to add variant");
     } finally {
@@ -100,7 +109,7 @@ export default function EditProductPage() {
     if(!confirm("Delete this variant?")) return;
     try {
       await apiDelete(`/admin/products/${id}/variants/${variantId}`);
-      fetchProduct();
+      refreshNestedData();
     } catch (err) {
       alert("Failed to delete variant");
     }
@@ -126,7 +135,7 @@ export default function EditProductPage() {
         body: formData
       });
       if (!res.ok) throw new Error("Upload failed");
-      fetchProduct();
+      refreshNestedData();
     } catch (err) {
       alert("Failed to upload images");
     } finally {
@@ -138,7 +147,7 @@ export default function EditProductPage() {
   const handleSetPrimaryImage = async (imageId: number) => {
     try {
       await apiPut(`/admin/products/${id}/images/${imageId}/primary`, {});
-      fetchProduct();
+      refreshNestedData();
     } catch (err) {
       alert("Failed to set primary image");
     }
@@ -148,7 +157,7 @@ export default function EditProductPage() {
     if(!confirm("Delete this image?")) return;
     try {
       await apiDelete(`/admin/products/${id}/images/${imageId}`);
-      fetchProduct();
+      refreshNestedData();
     } catch (err) {
       alert("Failed to delete image");
     }
