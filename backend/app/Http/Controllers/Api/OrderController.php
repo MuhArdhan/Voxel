@@ -285,6 +285,21 @@ class OrderController extends Controller
         return response()->json(['message' => 'Order cancelled successfully', 'order' => $order->fresh()]);
     }
 
+    public function complete(Request $request, Order $order): JsonResponse
+    {
+        if ($order->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($order->status !== Order::STATUS_SHIPPED) {
+            return response()->json(['message' => 'Only shipped orders can be marked as completed.'], 422);
+        }
+
+        $order->update(['status' => Order::STATUS_COMPLETED]);
+
+        return response()->json(['message' => 'Order marked as completed.', 'order' => $order->fresh()]);
+    }
+
     public function verifyPayment(Request $request, Order $order): JsonResponse
     {
         if ($order->user_id !== $request->user()->id) {

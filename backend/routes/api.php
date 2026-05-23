@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/checkout', [OrderController::class, 'checkout']);
         Route::get('/{order}', [OrderController::class, 'show']);
         Route::post('/{order}/cancel', [OrderController::class, 'cancel']);
+        Route::post('/{order}/complete', [OrderController::class, 'complete']);
         Route::post('/{order}/verify-payment', [OrderController::class, 'verifyPayment']);
         Route::get('/{order}/tracking', [OrderController::class, 'tracking']);
     });

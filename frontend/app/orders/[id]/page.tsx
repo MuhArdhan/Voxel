@@ -39,6 +39,7 @@ export default function OrderDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   const orderId = params.id as string;
@@ -96,13 +97,27 @@ export default function OrderDetailPage() {
     }
   }
 
+  async function handleCompleteOrder() {
+    if (!order || !confirm("Have you received the package? This action cannot be undone.")) return;
+
+    try {
+      setIsCompleting(true);
+      await apiPost(`/orders/${order.id}/complete`);
+      await fetchOrder();
+    } catch (err) {
+      alert(getErrorMessage(err));
+    } finally {
+      setIsCompleting(false);
+    }
+  }
+
   if (authLoading || !isLoggedIn || isLoading) {
     return (
       <div className="min-h-screen bg-[#F2F0EB] flex items-center justify-center py-24">
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-[#0A0A0A] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <div className="mono text-[10px] text-[#8A8680] tracking-[0.3em] uppercase animate-pulse">
-            System Protocol // Loading
+            Loading...
           </div>
         </div>
       </div>
@@ -448,6 +463,17 @@ export default function OrderDetailPage() {
                 <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#DC2626] opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#DC2626] opacity-0 group-hover:opacity-100 transition-opacity" />
                 {isCancelling ? "CANCELING..." : "CANCEL ORDER"}
+              </button>
+            )}
+
+            {/* Complete Button */}
+            {order.status === "shipped" && (
+              <button
+                onClick={handleCompleteOrder}
+                disabled={isCompleting}
+                className="w-full relative group bg-[#0A0A0A] text-[#F2F0EB] font-mono text-[10px] font-bold tracking-[0.2em] uppercase py-4 rounded-xl hover:bg-[#5C1A1A] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_4px_14px_0_rgba(0,0,0,0.39)] hover:shadow-[0_6px_20px_rgba(92,26,26,0.23)]"
+              >
+                {isCompleting ? "PROCESSING..." : "ORDER RECEIVED / SELESAI"}
               </button>
             )}
           </motion.div>
