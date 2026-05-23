@@ -180,10 +180,10 @@ export default function AccountSettings() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-3xl md:text-4xl font-black text-[#0A0A0A] tracking-tight mb-2">
-          System <span className="text-[#5C1A1A]">Config.</span>
+          Account <span className="text-[#5C1A1A]">Settings.</span>
         </h1>
         <p className="mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase">
-          User Protocol // Settings
+          Update your account information
         </p>
       </motion.div>
 

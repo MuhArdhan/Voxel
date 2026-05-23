@@ -98,7 +98,7 @@ export default function AdminCategoriesPage() {
       <div className="flex items-end justify-between mb-8">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-[#0A0A0A] uppercase">Categories</h1>
-          <p className="mono text-[10px] tracking-[0.2em] text-[#8A8680] mt-1 uppercase">System Protocol // Classification</p>
+          <p className="mono text-[10px] tracking-[0.2em] text-[#8A8680] mt-1 uppercase">Product Categories</p>
         </div>
         <button
           onClick={() => handleOpenModal()}

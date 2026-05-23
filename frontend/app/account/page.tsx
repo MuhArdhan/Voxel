@@ -29,7 +29,7 @@ export default function AccountDashboard() {
           Welcome, <span className="text-[#5C1A1A]">{user.name}</span>.
         </h1>
         <p className="mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase">
-          System Protocol // Dashboard
+          Dashboard
         </p>
       </motion.div>
 
@@ -98,7 +98,7 @@ export default function AccountDashboard() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-[#0A0A0A] group-hover:text-[#F2F0EB] mb-1 transition-colors">System Config</h3>
+              <h3 className="text-lg font-bold text-[#0A0A0A] group-hover:text-[#F2F0EB] mb-1 transition-colors">Settings</h3>
               <p className="text-sm text-[#8A8680] group-hover:text-[#C8C4BC]">Update profile & security</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-[#F2F0EB] flex items-center justify-center text-[#0A0A0A] group-hover:bg-[#5C1A1A] group-hover:text-[#F2F0EB] transition-colors">

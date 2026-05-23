@@ -106,7 +106,7 @@ export default function LoginPage() {
         <div className="relative z-10 flex items-center gap-6">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF] animate-pulse" />
-            <span className="mono text-[9px] text-[#4A4845] tracking-[0.2em] uppercase">System Online</span>
+            <span className="mono text-[9px] text-[#4A4845] tracking-[0.2em] uppercase">Secure Login</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#C8FF00]" />

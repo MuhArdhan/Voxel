@@ -89,7 +89,7 @@ export default function AdminDashboardPage() {
       <div>
         <h1 className="text-3xl font-black text-[#0A0A0A] tracking-tight mb-2">Overview</h1>
         <p className="mono text-[10px] text-[#8A8680] tracking-[0.2em] uppercase">
-          System Analytics
+          Analytics Overview
         </p>
       </div>
 

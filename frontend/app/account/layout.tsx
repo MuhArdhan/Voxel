@@ -31,7 +31,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-[#0A0A0A] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <div className="mono text-[10px] text-[#8A8680] tracking-[0.3em] uppercase animate-pulse">
-            System Protocol // Loading
+            Loading...
           </div>
         </div>
       </div>

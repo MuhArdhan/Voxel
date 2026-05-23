@@ -84,7 +84,7 @@ export default function OrdersPage() {
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-[#0A0A0A] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <div className="mono text-[10px] text-[#8A8680] tracking-[0.3em] uppercase animate-pulse">
-            System Protocol // Loading
+            Loading...
           </div>
         </div>
       </div>
@@ -124,7 +124,7 @@ export default function OrdersPage() {
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-8 h-px bg-[#C8C4BC]" />
                 <div className="mono text-[10px] text-[#8A8680] tracking-[0.25em] uppercase">
-                  User Protocol // Logs
+                  Order History
                 </div>
               </div>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#0A0A0A]">

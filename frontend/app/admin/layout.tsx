@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-[#F2F0EB] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <div className="mono text-[10px] text-[#F2F0EB] tracking-[0.3em] uppercase animate-pulse">
-            Admin Protocol // Authenticating
+            Authenticating...
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold truncate">{user?.name}</p>
-              <p className="mono text-[10px] text-[#00D4FF] tracking-widest uppercase">System Admin</p>
+              <p className="mono text-[10px] text-[#00D4FF] tracking-widest uppercase">Administrator</p>
             </div>
           </div>
 
