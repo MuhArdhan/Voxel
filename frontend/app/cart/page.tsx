@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { STORAGE_URL } from "@/lib/api";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function CartPage() {
   const { cart, isLoading, updateItem, removeItem } = useCart();
@@ -22,7 +23,9 @@ export default function CartPage() {
 
   if (isLoading && !cart) {
     return (
-      <div className="min-h-screen bg-[#F2F0EB] pt-28 pb-16 px-6 md:px-10">
+      <>
+        <Navbar />
+        <main className="min-h-screen pt-28 pb-16 px-6 md:px-10">
         <div className="max-w-[1200px] mx-auto flex flex-col lg:flex-row gap-12">
           <div className="w-full lg:w-2/3 space-y-6">
             <Skeleton className="h-10 w-48 bg-[#E8E5DF] rounded-xl mb-8" />
@@ -34,13 +37,17 @@ export default function CartPage() {
             <Skeleton className="h-64 w-full bg-[#E8E5DF] rounded-3xl sticky top-24" />
           </div>
         </div>
-      </div>
+      </main>
+      <Footer />
+      </>
     );
   }
 
   if (!hasItems) {
     return (
-      <div className="min-h-screen bg-[#F2F0EB] pt-28 pb-16 px-6 flex flex-col items-center justify-center text-center">
+      <>
+        <Navbar />
+        <main className="min-h-screen pt-28 pb-16 px-6 flex flex-col items-center justify-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -61,13 +68,16 @@ export default function CartPage() {
             <ArrowRight size={16} />
           </Link>
         </motion.div>
-      </div>
+      </main>
+      <Footer />
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F2F0EB] pt-28 pb-16 px-6 md:px-10">
+    <>
       <Navbar />
+      <main className="min-h-screen pt-28 pb-16 px-6 md:px-10">
       <div className="max-w-[1200px] mx-auto">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 mb-6 text-[10px] font-semibold tracking-[0.15em] uppercase text-[#8A8680]">
@@ -220,7 +230,9 @@ export default function CartPage() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 }

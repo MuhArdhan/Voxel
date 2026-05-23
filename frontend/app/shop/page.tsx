@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { ProductFilters } from "@/types";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 function ShopContent() {
   const router = useRouter();
@@ -223,6 +224,7 @@ export default function ShopPage() {
       }>
         <ShopContent />
       </Suspense>
+      <Footer />
     </>
   );
 }

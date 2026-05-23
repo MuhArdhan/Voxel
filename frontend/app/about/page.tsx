@@ -26,16 +26,8 @@ const values = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#F2F0EB] text-[#0A0A0A]">
+    <>
       <Navbar />
-
-      {/* Grain texture overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.25] z-50 mix-blend-overlay"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`,
-          backgroundSize: "200px 200px",
-        }}
-      />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 md:px-10 max-w-[1400px] mx-auto">
@@ -196,6 +188,6 @@ export default function AboutPage() {
       </section>
 
       <Footer />
-    </div>
+    </>
   );
 }
