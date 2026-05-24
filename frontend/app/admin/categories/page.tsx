@@ -56,6 +56,12 @@ export default function AdminCategoriesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (imageFile && imageFile.size > 2 * 1024 * 1024) {
+      alert("Validation Error: Ukuran gambar tidak boleh lebih dari 2MB.");
+      return;
+    }
+
     setIsSaving(true);
     
     const payload = new FormData();
@@ -203,7 +209,7 @@ export default function AdminCategoriesPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-[#8A8680] uppercase">Category Banner (Optional)</label>
+                <label className="text-xs font-bold text-[#8A8680] uppercase">Category Banner (Optional) - Max 2MB</label>
                 <input type="file" accept="image/*" ref={fileInputRef} onChange={e => setImageFile(e.target.files?.[0] || null)} className="w-full text-sm text-[#8A8680] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#0A0A0A] file:text-[#F2F0EB] hover:file:bg-[#5C1A1A] file:transition-colors cursor-pointer" />
               </div>
 
