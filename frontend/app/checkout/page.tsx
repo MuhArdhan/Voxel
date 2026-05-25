@@ -178,21 +178,11 @@ export default function CheckoutPage() {
         window.snap.embed(snapToken, {
           embedId: "snap-container",
           onSuccess: async () => {
-            try {
-              await apiPost(`/orders/${orderIdRef.current}/verify-payment`, {});
-            } catch (e) {
-              console.error("verify-payment failed:", e);
-            }
             setDone(true);
             clearCart();
             router.push(`/orders/${orderIdRef.current}?status=success`);
           },
           onPending: async () => {
-            try {
-              await apiPost(`/orders/${orderIdRef.current}/verify-payment`, {});
-            } catch (e) {
-              console.error("verify-payment (pending) failed:", e);
-            }
             setDone(true);
             clearCart();
             router.push(`/orders/${orderIdRef.current}?status=pending`);

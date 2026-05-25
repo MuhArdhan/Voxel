@@ -300,53 +300,7 @@ class OrderController extends Controller
         return response()->json(['message' => 'Order marked as completed.', 'order' => $order->fresh()]);
     }
 
-    public function verifyPayment(Request $request, Order $order): JsonResponse
-    {
-        if ($order->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
 
-        if (in_array($order->status, [
-            Order::STATUS_PAID,
-            Order::STATUS_PROCESSING,
-            Order::STATUS_SHIPPED,
-            Order::STATUS_COMPLETED
-        ])) {
-            return response()->json(['message' => 'Already paid or processed', 'order' => $order->fresh()]);
-        }
-
-        $paymentType = null;
-
-        try {
-            $status        = $this->midtrans->getTransactionStatus($order->order_number);
-            $txStatus      = $status['transaction_status'] ?? null;
-            $fraudStatus   = $status['fraud_status']       ?? null;
-            $paymentType   = $status['payment_type']       ?? null;
-
-            Log::info("verifyPayment [{$order->order_number}]: midtrans_status={$txStatus}");
-
-            if (in_array($txStatus, ['cancel', 'deny', 'expire'])) {
-                $order->update(['status' => Order::STATUS_CANCELLED]);
-                return response()->json(['message' => 'Payment cancelled', 'order' => $order->fresh()]);
-            }
-
-            if ($txStatus === 'capture' && $fraudStatus === 'challenge') {
-                return response()->json(['message' => 'Payment under review', 'order' => $order->fresh()]);
-            }
-        } catch (\Exception $e) {
-            Log::warning("verifyPayment Midtrans check failed for [{$order->order_number}]: " . $e->getMessage());
-        }
-
-        $order->update([
-            'status'         => Order::STATUS_PAID,
-            'payment_method' => $paymentType,
-            'paid_at'        => now(),
-        ]);
-
-        Log::info("verifyPayment: Order [{$order->order_number}] marked as PAID.");
-
-        return response()->json(['message' => 'Payment verified', 'order' => $order->fresh()]);
-    }
 
     public function tracking(Request $request, Order $order): JsonResponse
     {

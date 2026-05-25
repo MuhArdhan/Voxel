@@ -66,13 +66,7 @@ export default function OrderDetailPage() {
       setIsLoading(true);
       setError(null);
 
-      if (searchParams.get("status") === "success" || searchParams.get("status") === "pending") {
-        try {
-          await apiPost(`/orders/${orderId}/verify-payment`, {});
-        } catch (e) {
-          console.error("verify-payment failed:", e);
-        }
-      }
+
 
       const res = await apiGet<Order>(`/orders/${orderId}`);
       setOrder(res);

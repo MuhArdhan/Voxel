@@ -50,13 +50,13 @@ export default function ProductCard({ product, index = 0, size = "default" }: Pr
       transition={{ duration: 0.6, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group"
+      className="group flex flex-col h-full"
     >
       {/* Image container */}
-      <Link href={`/products/${product.slug}`}>
+      <Link href={`/products/${product.slug}`} className={`flex flex-col ${size === "large" ? "flex-1" : ""}`}>
         <div
           className={`relative overflow-hidden rounded-2xl bg-[#E8E5DF] ${
-            size === "large" ? "aspect-[3/4]" : size === "small" ? "aspect-square" : "aspect-[4/5]"
+            size === "large" ? "flex-1 w-full h-full" : size === "small" ? "aspect-square" : "aspect-[4/5]"
           }`}
         >
           {primaryImage ? (
@@ -149,11 +149,11 @@ export default function ProductCard({ product, index = 0, size = "default" }: Pr
 
       {/* Product info */}
       <div className="mt-3 px-1">
+        <div className="mono text-[9px] text-[#8A8680] tracking-[0.15em] uppercase mb-1 truncate">
+          {product.category.name}
+        </div>
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0">
-            <div className="mono text-[9px] text-[#8A8680] tracking-[0.15em] uppercase mb-0.5">
-              {product.category.name}
-            </div>
             <Link href={`/products/${product.slug}`}>
               <h3 className="text-sm font-bold text-[#0A0A0A] leading-snug hover:text-[#5C1A1A] transition-colors truncate">
                 {product.name}
@@ -163,11 +163,11 @@ export default function ProductCard({ product, index = 0, size = "default" }: Pr
           <div className="text-right flex-shrink-0">
             {hasDiscount ? (
               <>
-                <div className="text-sm font-bold text-[#0A0A0A]">{formatPrice(effectivePrice)}</div>
+                <div className="text-sm font-bold text-[#0A0A0A] leading-snug">{formatPrice(effectivePrice)}</div>
                 <div className="mono text-[9px] text-[#8A8680] line-through">{formatPrice(product.price)}</div>
               </>
             ) : (
-              <div className="text-sm font-bold text-[#0A0A0A]">{formatPrice(product.price)}</div>
+              <div className="text-sm font-bold text-[#0A0A0A] leading-snug">{formatPrice(product.price)}</div>
             )}
           </div>
         </div>

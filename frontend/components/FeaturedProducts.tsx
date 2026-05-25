@@ -8,7 +8,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { ProductCardSkeleton } from "./ui/skeleton";
 
 export default function FeaturedProducts() {
-  const { products, isLoading } = useProducts({ featured: true, per_page: 5 });
+  const { products, isLoading } = useProducts({ featured: true, per_page: 7 });
 
   return (
     <section className="relative py-24 md:py-32 bg-[#F2F0EB]">
@@ -48,7 +48,7 @@ export default function FeaturedProducts() {
                 <ProductCardSkeleton />
               </div>
               {/* Regular cards skeletons */}
-              {[...Array(4)].map((_, i) => (
+              {[...Array(6)].map((_, i) => (
                 <div key={i} className="col-span-1">
                   <ProductCardSkeleton />
                 </div>
@@ -56,14 +56,14 @@ export default function FeaturedProducts() {
             </>
           ) : products.length > 0 ? (
             <>
-              {/* Large featured card */}
-              <div className="col-span-2 md:col-span-1 lg:col-span-2 lg:row-span-2">
+              {/* Large featured card on the left */}
+              <div className="col-span-2 lg:row-span-2 h-full">
                 <ProductCard product={products[0]} index={0} size="large" />
               </div>
 
-              {/* Regular cards */}
-              {products.slice(1, 5).map((product, i) => (
-                <div key={product.id} className="col-span-1">
+              {/* 6 Regular cards forming a 3x2 grid on the right */}
+              {products.slice(1, 7).map((product, i) => (
+                <div key={product.id} className="col-span-1 h-full">
                   <ProductCard product={product} index={i + 1} size="default" />
                 </div>
               ))}
