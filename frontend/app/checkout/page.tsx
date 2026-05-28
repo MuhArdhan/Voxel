@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Check, ChevronRight, Lock, MapPin, Truck,
-  CreditCard, AlertCircle, Loader2, Search
+  Check, ChevronRight, ChevronDown, Lock, MapPin, Truck,
+  CreditCard, AlertCircle, Loader2, Search, Receipt
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -22,13 +22,8 @@ import { Textarea } from "@/components/ui/textarea";
 declare global {
   interface Window {
     snap: {
-      embed: (token: string, opts: {
-        embedId: string;
-        onSuccess?: (r: any) => void;
-        onPending?: (r: any) => void;
-        onError?:   (r: any) => void;
-        onClose?:   ()       => void;
-      }) => void;
+      embed: (token: string, opts: any) => void;
+      pay: (token: string, opts: any) => void;
     };
   }
 }
@@ -37,6 +32,35 @@ const STEPS = [
   { id: 1, name: "Address",  Icon: MapPin    },
   { id: 2, name: "Shipping", Icon: Truck     },
   { id: 3, name: "Payment",  Icon: CreditCard },
+];
+
+const PAYMENT_GROUPS = [
+  {
+    id: 'ewallet',
+    title: 'E-Wallet & QRIS',
+    methods: [
+      { id: 'gopay', name: 'GoPay', logo: '/logo/gopay.png' },
+      { id: 'dana', name: 'DANA', logo: '/logo/dana.png' },
+      { id: 'qris', name: 'QRIS', logo: '/logo/qris.png' },
+    ]
+  },
+  {
+    id: 'va',
+    title: 'Virtual Account',
+    methods: [
+      { id: 'bca_va', name: 'BCA Virtual Account', logo: '/logo/bca.png' },
+      { id: 'mandiri_va', name: 'Mandiri Virtual Account', logo: '/logo/mandiri.png' },
+      { id: 'bni_va', name: 'BNI Virtual Account', logo: '/logo/bni.png' },
+      { id: 'bri_va', name: 'BRI Virtual Account', logo: '/logo/bri.png' },
+    ]
+  },
+  {
+    id: 'card',
+    title: 'Card Payment',
+    methods: [
+      { id: 'credit_card', name: 'Credit Card / Debit Card', icon: CreditCard },
+    ]
+  }
 ];
 
 function loadSnapScript(clientKey: string, onLoad: () => void) {
@@ -72,7 +96,9 @@ export default function CheckoutPage() {
   const [done,            setDone]            = useState(false);
   const [snapToken,       setSnapToken]       = useState<string | null>(null);
   const [snapReady,       setSnapReady]       = useState(false);
-  const [snapEmbedded,    setSnapEmbedded]    = useState(false);
+  const [activePaymentGroup, setActivePaymentGroup] = useState<string | null>(null);
+  const [isPaymentOpen,   setIsPaymentOpen]   = useState(false);
+
   const orderIdRef     = useRef<number | null>(null);
   const embedDone      = useRef(false);
 
@@ -166,46 +192,8 @@ export default function CheckoutPage() {
     loadSnapScript(clientKey, () => setSnapReady(true));
   }, [clientKey]);
 
-  useEffect(() => {
-    if (!snapToken || !snapReady || step !== 3 || snapEmbedded || embedDone.current) return;
 
-    let tries = 0;
-    const run = () => {
-      tries++;
-      const el = document.getElementById("snap-container");
-      if (el && window.snap) {
-        embedDone.current = true;
-        window.snap.embed(snapToken, {
-          embedId: "snap-container",
-          onSuccess: async () => {
-            setDone(true);
-            clearCart();
-            router.push(`/orders/${orderIdRef.current}?status=success`);
-          },
-          onPending: async () => {
-            setDone(true);
-            clearCart();
-            router.push(`/orders/${orderIdRef.current}?status=pending`);
-          },
-          onError: () => {
-            setError("Payment failed. Please try again.");
-            embedDone.current = false;
-            setSnapEmbedded(false);
-          },
-          onClose: () => {
-            embedDone.current = false;
-            setSnapEmbedded(false);
-          },
-        });
-        setSnapEmbedded(true);
-      } else if (tries < 30) {
-        setTimeout(run, 100);
-      } else {
-        setError("Failed to load payment interface. Please refresh the page.");
-      }
-    };
-    setTimeout(run, 200);
-  }, [snapToken, snapReady, step]);
+
 
   /* ── navigation helpers ── */
   const nextStep = async () => {
@@ -224,7 +212,7 @@ export default function CheckoutPage() {
         setError("Please select a shipping service.");
         return;
       }
-      await goToPayment();
+      setStep(3);
     }
   };
 
@@ -232,7 +220,6 @@ export default function CheckoutPage() {
     if (step > 1) {
       if (step === 3) {
         embedDone.current = false;
-        setSnapEmbedded(false);
         setSnapToken(null);
       }
       setStep(s => s - 1);
@@ -259,10 +246,9 @@ export default function CheckoutPage() {
     }
   };
 
-  const goToPayment = async () => {
+  const createOrderAndPay = async (method?: string) => {
     setSubmitting(true);
     setError(null);
-    embedDone.current = false;
     try {
       const values = form.getValues();
       const payload: CheckoutPayload = {
@@ -270,15 +256,53 @@ export default function CheckoutPage() {
         courier: selectedCourier,
         courier_service: selectedService.courier_service_code,
         shipping_cost: selectedService.price,
+        selected_payment_method: method,
       };
       const res = await apiPost("/orders/checkout", payload);
       orderIdRef.current = res.order?.id ?? null;
-      setClientKey(res.client_key ?? "");
-      setSnapToken(res.snap_token);
-      setStep(3);
+      
+      const proceed = () => {
+        if (window.snap && res.snap_token) {
+          window.snap.pay(res.snap_token, {
+            onSuccess: async () => {
+              setDone(true);
+              clearCart();
+              router.push(`/orders/${res.order.id}?status=success`);
+            },
+            onPending: async () => {
+              setDone(true);
+              clearCart();
+              router.push(`/orders/${res.order.id}?status=pending`);
+            },
+            onError: () => {
+              setError("Payment failed. Please try again.");
+              setSubmitting(false);
+            },
+            onClose: () => {
+              // Redirect to order page to pay later
+              setDone(true);
+              clearCart();
+              router.push(`/orders/${res.order.id}`);
+            },
+          });
+        }
+      };
+
+      if (res.client_key && !window.snap) {
+        loadSnapScript(res.client_key, proceed);
+      } else {
+        proceed();
+      }
+      
+      // If pay later
+      if (!method && res.order?.id) {
+        setDone(true);
+        clearCart();
+        router.push(`/orders/${res.order.id}`);
+      }
+      
     } catch (e: any) {
       setError(e.response?.data?.message || "An error occurred. Please try again.");
-    } finally {
       setSubmitting(false);
     }
   };
@@ -540,36 +564,123 @@ export default function CheckoutPage() {
                     >
                       <h2 className="text-2xl font-black text-[#0A0A0A] border-b border-[#C8C4BC] pb-4">3. Payment Selection</h2>
 
-                      {/* summary strip */}
-                      <div className="bg-[#F2F0EB] border border-[#C8C4BC] rounded-2xl p-4 text-sm text-[#4A4845] flex flex-wrap gap-x-6 gap-y-1">
-                        <span><strong className="text-[#0A0A0A]">Address:</strong> {form.getValues("shipping_city")}, {form.getValues("shipping_province")}</span>
-                        <span><strong className="text-[#0A0A0A]">Courier:</strong> {selectedService?.courier_name} – {selectedService?.courier_service_name}</span>
-                        <span><strong className="text-[#0A0A0A]">Total:</strong> {formatPrice(total)}</span>
+                      {/* Order Data Summary */}
+                      <div className="bg-[#F2F0EB] border border-[#C8C4BC] rounded-2xl p-6 mb-8 flex flex-col sm:flex-row gap-6">
+                        {/* Address */}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 text-[#0A0A0A] mb-3">
+                            <MapPin size={16} />
+                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Ship To</span>
+                          </div>
+                          <div className="text-sm text-[#4A4845] space-y-1">
+                            <p className="font-bold text-[#0A0A0A]">
+                              {form.getValues("shipping_name")} <span className="text-[#C8C4BC] font-normal mx-1">|</span> {form.getValues("shipping_phone")}
+                            </p>
+                            <p className="leading-relaxed pt-1">{form.getValues("shipping_address")}</p>
+                            <p>{form.getValues("shipping_city")}, {form.getValues("shipping_province")} {form.getValues("shipping_postal_code")}</p>
+                          </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="w-full h-px sm:w-px sm:h-auto bg-[#C8C4BC]" />
+
+                        {/* Courier */}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 text-[#0A0A0A] mb-3">
+                            <Truck size={16} />
+                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Delivery</span>
+                          </div>
+                          <div className="text-sm text-[#4A4845]">
+                            <p className="font-bold text-[#0A0A0A] uppercase tracking-wide">
+                              {selectedService?.courier_name || "Courier"}
+                            </p>
+                            <p className="mt-1">{selectedService?.courier_service_name}</p>
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Snap container — Midtrans injects payment UI here */}
-                      <div className="relative min-h-[200px]">
-                        {!snapEmbedded && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                            <Loader2 size={36} className="animate-spin text-[#5C1A1A]" />
-                            <p className="text-sm text-[#4A4845] font-medium">Loading payment options...</p>
-                          </div>
-                        )}
-                        <div id="snap-container" className="w-full" />
+                      {/* Custom Payment Methods List */}
+                      <div>
+                        <h3 className="text-sm font-bold text-[#0A0A0A] uppercase tracking-[0.2em] mb-6">Select Payment Method</h3>
+                        
+                        <div className="space-y-6 mb-8">
+                          {PAYMENT_GROUPS.map(group => (
+                            <div key={group.id}>
+                              <button
+                                type="button"
+                                onClick={() => setActivePaymentGroup(activePaymentGroup === group.id ? null : group.id)}
+                                className="w-full flex items-center justify-between mb-2 text-left group/btn p-2 -ml-2 rounded-lg hover:bg-[#E8E5DF]/50 transition-colors"
+                              >
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                                  <h4 className="text-[10px] text-[#8A8680] group-hover/btn:text-[#0A0A0A] font-bold tracking-widest uppercase transition-colors">{group.title}</h4>
+                                  
+                                  <div className="flex flex-wrap items-center gap-3">
+                                    {group.methods.map(m => m.logo ? (
+                                      <img key={m.id} src={m.logo} alt={m.name} className="h-3 max-w-[30px] object-contain grayscale opacity-50 group-hover/btn:opacity-100 transition-opacity" />
+                                    ) : m.icon ? (
+                                      <m.icon key={m.id} size={14} className="text-[#8A8680] group-hover/btn:text-[#0A0A0A] transition-colors opacity-50 group-hover/btn:opacity-100" />
+                                    ) : null)}
+                                  </div>
+                                </div>
+                                <ChevronDown size={16} className={`text-[#8A8680] group-hover/btn:text-[#0A0A0A] transition-transform duration-300 ${activePaymentGroup === group.id ? 'rotate-180' : ''}`} />
+                              </button>
+
+                              <AnimatePresence>
+                                {activePaymentGroup === group.id && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <div className="space-y-3 pt-2">
+                                      {group.methods.map((method) => (
+                                        <button
+                                          key={method.id}
+                                          type="button"
+                                          onClick={() => createOrderAndPay(method.id)}
+                                          disabled={submitting}
+                                          className="w-full bg-transparent border border-[#C8C4BC] hover:border-[#0A0A0A] hover:bg-[#E8E5DF] p-4 rounded-xl flex items-center justify-between transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                          <div className="flex items-center gap-4">
+                                            <div className="w-12 h-8 bg-white border border-[#C8C4BC] rounded flex items-center justify-center p-1.5 shadow-sm group-hover:border-[#0A0A0A] transition-colors shrink-0">
+                                              {method.logo ? (
+                                                <img src={method.logo} alt={method.name} className="w-full h-full object-contain" />
+                                              ) : method.icon ? (
+                                                <method.icon className="text-[#0A0A0A]" size={18} />
+                                              ) : null}
+                                            </div>
+                                            <span className="font-bold text-[#0A0A0A] text-sm group-hover:text-[#5C1A1A] transition-colors">{method.name}</span>
+                                          </div>
+                                          <ChevronRight size={18} className="text-[#C8C4BC] group-hover:text-[#0A0A0A] transition-colors" />
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex justify-center border-t border-[#C8C4BC] pt-6">
+                          <button 
+                            type="button" 
+                            onClick={() => createOrderAndPay()}
+                            disabled={submitting}
+                            className="text-[11px] font-bold tracking-widest uppercase text-[#8A8680] hover:text-[#0A0A0A] transition-colors"
+                          >
+                            Show Other Payment Methods
+                          </button>
+                        </div>
                       </div>
 
                       {error && (
-                        <div className="flex gap-3 bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-sm">
+                        <div className="flex gap-3 bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-sm mt-4">
                           <AlertCircle size={16} className="mt-0.5 shrink-0" />
                           <span>{error}</span>
                         </div>
                       )}
-
-                      <div className="pt-4 border-t border-[#C8C4BC]">
-                        <Button type="button" variant="outline" onClick={prevStep} className="border-[#C8C4BC] rounded-full px-8 py-6">
-                          Back
-                        </Button>
-                      </div>
                     </motion.div>
                   )}
 

@@ -190,6 +190,7 @@ export interface CheckoutPayload {
   courier_service: string;
   shipping_cost: number;
   notes?: string;
+  selected_payment_method?: string;
 }
 
 export const checkoutSchema = z.object({

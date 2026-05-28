@@ -117,6 +117,7 @@ class OrderController extends Controller
             'courier_service'      => ['required', 'string'],
             'shipping_cost'        => ['required', 'numeric', 'min:0'],
             'notes'                => ['nullable', 'string'],
+            'selected_payment_method' => ['nullable', 'string'],
         ]);
 
         $cart = Cart::where('user_id', $request->user()->id)
@@ -185,7 +186,7 @@ class OrderController extends Controller
 
                 // Get Midtrans Snap token INSIDE transaction
                 // If this throws, everything above is rolled back
-                $snapData = $this->midtrans->createSnapToken($order);
+                $snapData = $this->midtrans->createSnapToken($order, $validated['selected_payment_method'] ?? null);
 
                 $order->update([
                     'payment_token' => $snapData['snap_token'],

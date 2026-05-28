@@ -19,7 +19,7 @@ class MidtransService
     /**
      * Create a Midtrans Snap transaction and return the snap token.
      */
-    public function createSnapToken(Order $order): array
+    public function createSnapToken(Order $order, ?string $paymentMethod = null): array
     {
         $order->loadMissing('user');
 
@@ -53,6 +53,10 @@ class MidtransService
                 'finish' => config('app.frontend_url') . "/orders/{$order->id}?status=success",
             ],
         ];
+
+        if ($paymentMethod) {
+            $params['enabled_payments'] = [$paymentMethod];
+        }
 
         $snapResponse = Snap::createTransaction($params);
 
