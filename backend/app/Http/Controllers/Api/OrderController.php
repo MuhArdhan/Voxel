@@ -258,7 +258,14 @@ class OrderController extends Controller
                     ]);
                 }
             } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
-                $order->update(['status' => Order::STATUS_CANCELLED]);
+                if ($order->status !== Order::STATUS_CANCELLED) {
+                    DB::transaction(function () use ($order) {
+                        foreach ($order->items as $item) {
+                            $item->variant->increment('stock', $item->quantity);
+                        }
+                        $order->update(['status' => Order::STATUS_CANCELLED]);
+                    });
+                }
             } elseif ($transactionStatus === 'pending') {
                 $order->update(['status' => Order::STATUS_PENDING]);
             }
