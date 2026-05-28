@@ -53,7 +53,10 @@ class OrderController extends Controller
 
         $order->load(['items.product.images']);
 
-        return response()->json($order);
+        $data = $order->toArray();
+        $data['client_key'] = config('midtrans.client_key');
+
+        return response()->json($data);
     }
 
     // ─── Shipping: Biteship ───────────────────────────────────────────────────

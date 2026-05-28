@@ -170,6 +170,7 @@ export interface Order {
   payment_method?: string;
   payment_token?: string;
   payment_url?: string;
+  client_key?: string;
   paid_at?: string;
   notes?: string;
   items: OrderItem[];

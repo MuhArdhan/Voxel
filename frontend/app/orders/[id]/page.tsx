@@ -30,6 +30,28 @@ const containerVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
+function loadSnapScript(clientKey: string, onLoad: () => void) {
+  if (typeof window === "undefined") return;
+  if (window.snap) { onLoad(); return; }
+
+  const existing = document.getElementById("midtrans-snap-js") as HTMLScriptElement | null;
+  if (existing) {
+    if (window.snap) { onLoad(); }
+    else { existing.addEventListener("load", onLoad, { once: true }); }
+    return;
+  }
+
+  const isProduction = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true";
+  const s = document.createElement("script");
+  s.id   = "midtrans-snap-js";
+  s.src  = isProduction
+    ? "https://app.midtrans.com/snap/snap.js"
+    : "https://app.sandbox.midtrans.com/snap/snap.js";
+  s.setAttribute("data-client-key", clientKey);
+  s.addEventListener("load", onLoad, { once: true });
+  document.body.appendChild(s);
+}
+
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -40,6 +62,7 @@ export default function OrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   const orderId = params.id as string;
@@ -102,6 +125,33 @@ export default function OrderDetailPage() {
       alert(getErrorMessage(err));
     } finally {
       setIsCompleting(false);
+    }
+  }
+
+  function handlePayNow() {
+    if (!order || !order.payment_token || !order.client_key) {
+      alert("Payment token or client key is missing. Please contact support.");
+      return;
+    }
+
+    setIsPaying(true);
+
+    const proceed = () => {
+      setIsPaying(false);
+      window.snap.pay(order.payment_token, {
+        onSuccess: () => fetchOrder(),
+        onPending: () => fetchOrder(),
+        onError: () => alert("Payment failed. Please try again."),
+        onClose: () => {
+          // user closed popup
+        },
+      });
+    };
+
+    if (!window.snap) {
+      loadSnapScript(order.client_key, proceed);
+    } else {
+      proceed();
     }
   }
 
@@ -447,11 +497,22 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
+            {/* Pay Now Button */}
+            {order.status === "pending" && order.payment_token && (
+              <button
+                onClick={handlePayNow}
+                disabled={isPaying || isCancelling}
+                className="w-full relative bg-[#0A0A0A] text-[#F2F0EB] font-mono text-[10px] font-bold tracking-[0.2em] uppercase py-4 rounded-xl hover:bg-[#5C1A1A] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_4px_14px_0_rgba(0,0,0,0.39)] hover:shadow-[0_6px_20px_rgba(92,26,26,0.23)] mb-4"
+              >
+                {isPaying ? "PROCESSING..." : "PAY NOW"}
+              </button>
+            )}
+
             {/* Cancel Button */}
             {order.status === "pending" && (
               <button
                 onClick={handleCancelOrder}
-                disabled={isCancelling}
+                disabled={isCancelling || isPaying}
                 className="w-full relative group bg-transparent border border-[#DC2626]/50 text-[#DC2626] font-mono text-[10px] font-bold tracking-[0.2em] uppercase py-4 rounded-xl hover:bg-[#DC2626]/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
               >
                 <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#DC2626] opacity-0 group-hover:opacity-100 transition-opacity" />
