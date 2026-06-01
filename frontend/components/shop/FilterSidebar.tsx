@@ -9,9 +9,9 @@ import { Separator } from "@/components/ui/separator";
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const SORT_OPTIONS = [
-  { value: "created_at:desc", label: "Terbaru" },
-  { value: "price:asc", label: "Harga Terendah" },
-  { value: "price:desc", label: "Harga Tertinggi" },
+  { value: "created_at:desc", label: "Newest" },
+  { value: "price:asc", label: "Price: Low to High" },
+  { value: "price:desc", label: "Price: High to Low" },
   { value: "name:asc", label: "A → Z" },
 ];
 
@@ -52,7 +52,7 @@ export function FilterSidebar({
           <p className="mono text-[9px] text-[#8A8680] tracking-[0.2em] uppercase">Filters</p>
           {activeFilterCount > 0 && (
             <p className="text-[10px] text-[#5C1A1A] font-semibold mt-0.5">
-              {activeFilterCount} aktif
+              {activeFilterCount} active
             </p>
           )}
         </div>
@@ -71,7 +71,7 @@ export function FilterSidebar({
 
       {/* Sort */}
       <div className="space-y-3">
-        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Urutkan</p>
+        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Sort</p>
         <div className="space-y-1.5">
           {SORT_OPTIONS.map((opt) => (
             <button
@@ -97,7 +97,7 @@ export function FilterSidebar({
 
       {/* Categories */}
       <div className="space-y-3">
-        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Kategori</p>
+        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Category</p>
         <div className="space-y-1.5">
           <button
             onClick={() => onFilterChange("category", undefined)}
@@ -108,7 +108,7 @@ export function FilterSidebar({
                 : "text-[#8A8680] hover:text-[#4A4845]"
             )}
           >
-            Semua Kategori
+            All Categories
           </button>
           {categories.map((cat) => (
             <button
@@ -137,7 +137,7 @@ export function FilterSidebar({
 
       {/* Sizes */}
       <div className="space-y-3">
-        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Ukuran</p>
+        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Size</p>
         <div className="grid grid-cols-3 gap-2">
           {SIZES.map((size) => (
             <button
@@ -160,7 +160,7 @@ export function FilterSidebar({
 
       {/* Price Range */}
       <div className="space-y-3">
-        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Harga</p>
+        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Price</p>
         <div className="flex gap-2 items-center">
           <input
             type="number"
@@ -184,7 +184,7 @@ export function FilterSidebar({
 
       {/* Toggles */}
       <div className="space-y-3">
-        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Tampilkan</p>
+        <p className="mono text-[9px] font-semibold text-[#4A4845] tracking-[0.2em] uppercase">Display</p>
         <div className="space-y-2.5">
           {[
             { key: "limited" as const, label: "Limited Drop Only" },
@@ -221,7 +221,7 @@ export function FilterSidebar({
           onClick={onReset}
           className="w-full"
         >
-          Reset Semua Filter
+          Clear All Filters
         </Button>
       )}
     </aside>

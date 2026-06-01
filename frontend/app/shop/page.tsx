@@ -99,7 +99,7 @@ function ShopContent() {
             SHOP
           </h1>
           <p className="text-sm text-[#4A4845]">
-            Menampilkan <span className="font-bold text-[#0A0A0A]">{total}</span> produk
+            Showing <span className="font-bold text-[#0A0A0A]">{total}</span> products
           </p>
         </div>
 
@@ -109,7 +109,7 @@ function ShopContent() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8680]" />
             <Input
               type="text"
-              placeholder="Cari produk..."
+              placeholder="Search products..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9 h-11 bg-white border-[#C8C4BC] focus-visible:border-[#0A0A0A] rounded-full text-xs w-full"
@@ -179,7 +179,7 @@ function ShopContent() {
                     disabled={isLoadingMore}
                     className="rounded-full bg-transparent border-[#0A0A0A] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-[#F2F0EB]"
                   >
-                    {isLoadingMore ? "Memuat..." : "Load More"}
+                    {isLoadingMore ? "Loading..." : "Load More"}
                   </Button>
                 </div>
               )}
@@ -190,12 +190,12 @@ function ShopContent() {
               <div className="w-16 h-16 bg-[#E8E5DF] rounded-full flex items-center justify-center mb-4">
                 <Search size={24} className="text-[#8A8680]" />
               </div>
-              <h3 className="text-xl font-bold text-[#0A0A0A] mb-2">Produk tidak ditemukan</h3>
+              <h3 className="text-xl font-bold text-[#0A0A0A] mb-2">No products found</h3>
               <p className="text-[#4A4845] text-sm max-w-md mx-auto mb-6">
-                Kami tidak dapat menemukan produk yang sesuai dengan filter pencarian Anda. Coba kurangi filter atau cari dengan kata kunci lain.
+                We couldn't find any products matching your search filters. Try reducing filters or search with another keyword.
               </p>
               <Button onClick={handleResetFilters} className="rounded-full">
-                Reset Pencarian
+                Reset Search
               </Button>
             </div>
           )}

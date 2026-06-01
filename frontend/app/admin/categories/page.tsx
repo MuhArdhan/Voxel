@@ -60,7 +60,7 @@ export default function AdminCategoriesPage() {
     e.preventDefault();
 
     if (imageFile && imageFile.size > 2 * 1024 * 1024) {
-      await alert({ title: "Validation Error", message: "Ukuran gambar tidak boleh lebih dari 2MB.", variant: "error" });
+      await alert({ title: "Validation Error", message: "Image size cannot exceed 2MB.", variant: "error" });
       return;
     }
 

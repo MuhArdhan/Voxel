@@ -34,7 +34,10 @@ const STEPS = [
   { id: 3, name: "Payment",  Icon: CreditCard },
 ];
 
-const PAYMENT_GROUPS = [
+type PaymentMethod = { id: string; name: string; logo?: string; icon?: any };
+type PaymentGroup = { id: string; title: string; methods: PaymentMethod[] };
+
+const PAYMENT_GROUPS: PaymentGroup[] = [
   {
     id: 'ewallet',
     title: 'E-Wallet & QRIS',
@@ -230,7 +233,7 @@ export default function CheckoutPage() {
     setIsLoadingRates(true);
     setError(null);
     try {
-        const res = await apiPost('/shipping/rates', {
+        const res = await apiPost<any>('/shipping/rates', {
             destination_area_id: form.getValues('destination_area_id')
         });
         setDynamicRates(res);
@@ -258,7 +261,7 @@ export default function CheckoutPage() {
         shipping_cost: selectedService.price,
         selected_payment_method: method,
       };
-      const res = await apiPost("/orders/checkout", payload);
+      const res = await apiPost<any>("/orders/checkout", payload);
       orderIdRef.current = res.order?.id ?? null;
       
       const proceed = () => {

@@ -125,9 +125,7 @@ export default function AccountSettings() {
       if (avatarFile) formData.append("avatar", avatarFile);
 
       // Using apiPost because Laravel requires POST for FormData with _method=PUT
-      const res = await apiPost("/auth/profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await apiPost("/auth/profile", formData);
 
       setProfileMessage({ type: "success", text: "Profile updated successfully." });
       // Update global context so the UI reflects the new name/avatar immediately

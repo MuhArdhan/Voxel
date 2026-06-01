@@ -133,7 +133,7 @@ export default function RegisterPage() {
             transition={{ delay: 0.3, duration: 0.7 }}
             className="text-sm text-[#4A4845] max-w-xs leading-relaxed"
           >
-            Daftar dan dapatkan akses eksklusif ke limited drop, notifikasi rilis terbaru, dan pengalaman berbelanja yang dipersonalisasi.
+            Register and get exclusive access to limited drops, new release notifications, and a personalized shopping experience.
           </motion.p>
         </div>
 
@@ -145,9 +145,9 @@ export default function RegisterPage() {
           className="relative z-10 space-y-2"
         >
           {[
-            "Early access ke Limited Drop",
-            "Pantau status pesanan real-time",
-            "Riwayat pembelian tersimpan",
+            "Early access to Limited Drop",
+            "Track order status in real-time",
+            "Saved purchase history",
           ].map((benefit) => (
             <div key={benefit} className="flex items-center gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6] flex-shrink-0" />
@@ -178,10 +178,10 @@ export default function RegisterPage() {
               — Create Account
             </p>
             <h2 className="text-3xl font-black text-[#0A0A0A] tracking-tight">
-              Daftar sekarang.
+              Sign in now.
             </h2>
             <p className="text-sm text-[#8A8680]">
-              Sudah punya akun?{" "}
+              Already have an account?{" "}
               <Link
                 href="/login"
                 className="text-[#0A0A0A] font-semibold underline underline-offset-4 hover:text-[#5C1A1A] transition-colors"
@@ -355,7 +355,7 @@ export default function RegisterPage() {
               href="/"
               className="mono text-[10px] text-[#8A8680] tracking-[0.15em] uppercase hover:text-[#0A0A0A] transition-colors underline underline-offset-4"
             >
-              ← Kembali ke toko
+              ← Back to store
             </Link>
           </p>
         </motion.div>

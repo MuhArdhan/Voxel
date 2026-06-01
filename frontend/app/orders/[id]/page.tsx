@@ -91,8 +91,6 @@ export default function OrderDetailPage() {
       setIsLoading(true);
       setError(null);
 
-
-
       const res = await apiGet<Order>(`/orders/${orderId}`);
       setOrder(res);
     } catch (err) {
@@ -156,7 +154,7 @@ export default function OrderDetailPage() {
 
     const proceed = () => {
       setIsPaying(false);
-      window.snap.pay(order.payment_token, {
+      window.snap.pay(order.payment_token!, {
         onSuccess: () => fetchOrder(),
         onPending: () => fetchOrder(),
         onError: () => alert({ title: "Payment Failed", message: "An error occurred during payment. Please try again.", variant: "error" }),

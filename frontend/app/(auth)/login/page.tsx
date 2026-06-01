@@ -35,7 +35,7 @@ export default function LoginPage() {
 
     try {
       await login({ email: form.email, password: form.password });
-      toast.success("Selamat datang kembali!");
+      toast.success("Welcome back!");
       router.push(redirect);
     } catch (err) {
       const validationErrors = getValidationErrors(err);
@@ -98,7 +98,7 @@ export default function LoginPage() {
             transition={{ delay: 0.3, duration: 0.7 }}
             className="text-sm text-[#4A4845] max-w-xs leading-relaxed"
           >
-            Akses koleksi eksklusif, pantau pesanan, dan jadilah yang pertama mendapatkan limited drop.
+            Access exclusive collections, track orders, and be the first to get limited drops.
           </motion.p>
         </div>
 
@@ -144,7 +144,7 @@ export default function LoginPage() {
                 href="/register"
                 className="text-[#0A0A0A] font-semibold underline underline-offset-4 hover:text-[#5C1A1A] transition-colors"
               >
-                Daftar sekarang
+                Sign up now
               </Link>
             </p>
           </div>
@@ -249,7 +249,7 @@ export default function LoginPage() {
               href="/"
               className="mono text-[10px] text-[#8A8680] tracking-[0.15em] uppercase hover:text-[#0A0A0A] transition-colors underline underline-offset-4"
             >
-              ← Kembali ke toko
+              ← Back to store
             </Link>
           </p>
         </motion.div>

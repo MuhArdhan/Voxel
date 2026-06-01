@@ -63,8 +63,8 @@ export default function ProductDetailPage() {
       } catch (err: any) {
         setError(
           err.response?.status === 404
-            ? "Produk tidak ditemukan."
-            : "Terjadi kesalahan saat memuat produk."
+            ? "Product not found."
+            : "An error occurred while loading the product."
         );
       } finally {
         setIsLoading(false);
@@ -82,7 +82,7 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product) return;
     if (!selectedSize || !selectedVariant) { 
-      toast.error("Pilih ukuran dulu."); 
+      toast.error("Please select a size."); 
       return; 
     }
     if (quantity > availableStock) { 
@@ -99,7 +99,7 @@ export default function ProductDetailPage() {
         setIsCartOpen(true);
       }
     } catch {
-      toast.error("Gagal menambahkan ke keranjang.");
+      toast.error("Failed to add to cart.");
     } finally {
       setIsAdding(false);
     }
@@ -162,10 +162,10 @@ export default function ProductDetailPage() {
         <div className="w-20 h-20 bg-[#E8E5DF] rounded-full flex items-center justify-center mb-6">
           <AlertCircle size={28} className="text-[#8A8680]" />
         </div>
-        <h3 className="text-2xl font-black text-[#0A0A0A] mb-2">{error || "Produk tidak ditemukan"}</h3>
-        <p className="text-[#8A8680] text-sm mb-8">Mungkin URL salah atau produk telah dihapus.</p>
+        <h3 className="text-2xl font-black text-[#0A0A0A] mb-2">{error || "Product not found"}</h3>
+        <p className="text-[#8A8680] text-sm mb-8">The URL might be incorrect or the product has been deleted.</p>
         <Button onClick={() => router.push("/shop")} className="rounded-full px-8">
-          ← Kembali ke Shop
+          ← Back to Shop
         </Button>
       </div>
     );
@@ -322,7 +322,7 @@ export default function ProductDetailPage() {
               {/* Description */}
               <div className="mb-7">
                 <p className="text-[#4A4845] text-sm leading-relaxed">
-                  {product.description || "Tidak ada deskripsi produk."}
+                  {product.description || "No product description available."}
                 </p>
                 {product.material && (
                   <div className="mt-4 inline-flex items-center gap-2 bg-[#E8E5DF] border border-[#C8C4BC] rounded-full px-4 py-2">
@@ -340,7 +340,7 @@ export default function ProductDetailPage() {
               <div className="mb-7">
                 <div className="flex items-center justify-between mb-4">
                   <span className="mono text-[10px] font-bold tracking-[0.2em] uppercase text-[#4A4845]">
-                    Pilih Ukuran
+                    Select Size
                     {selectedSize && (
                       <span className="ml-2 text-[#0A0A0A]">— {selectedSize}</span>
                     )}
