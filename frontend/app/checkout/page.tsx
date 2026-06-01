@@ -472,7 +472,10 @@ export default function CheckoutPage() {
                           </AnimatePresence>
                         </div>
                       </div>
-                      <div className="pt-6 flex justify-end">
+                      <div className="pt-6 flex justify-between items-center border-t border-[#C8C4BC] mt-8">
+                        <Button type="button" variant="outline" onClick={() => router.push('/cart')} className="border-[#C8C4BC] rounded-full px-8 py-6 text-[#0A0A0A] hover:text-[#F2F0EB]">
+                          Back to Cart
+                        </Button>
                         <Button type="button" onClick={nextStep} className="bg-[#0A0A0A] text-[#F2F0EB] rounded-full px-8 py-6 flex items-center gap-2 hover:bg-[#5C1A1A]">
                           Continue to Shipping <ChevronRight size={18} />
                         </Button>
@@ -663,7 +666,10 @@ export default function CheckoutPage() {
                           ))}
                         </div>
 
-                        <div className="flex justify-center border-t border-[#C8C4BC] pt-6">
+                        <div className="flex items-center justify-between border-t border-[#C8C4BC] pt-6">
+                          <Button type="button" variant="outline" onClick={prevStep} disabled={submitting} className="border-[#C8C4BC] rounded-full px-8 py-6 text-[#0A0A0A] hover:text-[#F2F0EB]">
+                            Back
+                          </Button>
                           <button 
                             type="button" 
                             onClick={() => createOrderAndPay()}
