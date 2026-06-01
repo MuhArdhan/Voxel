@@ -5,12 +5,14 @@ import { apiGet, apiPost, STORAGE_URL } from "@/lib/api";
 import { type PaginatedResponse, type User } from "@/types";
 import { Search, ShieldAlert, Shield, User as UserIcon } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { useDialog } from "@/components/ui/dialog-custom";
 
 export default function AdminUsersPage() {
   const [data, setData] = useState<PaginatedResponse<User> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const { confirm, alert, Dialog } = useDialog();
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -33,13 +35,19 @@ export default function AdminUsersPage() {
 
   const handleToggleRole = async (user: User) => {
     const action = user.role === "admin" ? "demote to User" : "promote to Admin";
-    if (!confirm(`Are you sure you want to ${action} ${user.name}?`)) return;
+    const ok = await confirm({
+      title: user.role === "admin" ? "Demote to User?" : "Promote to Admin?",
+      message: `Are you sure you want to ${action} ${user.name}?`,
+      variant: "confirm",
+      confirmLabel: "Yes, Proceed",
+    });
+    if (!ok) return;
     setActionLoading(user.id);
     try {
       await apiPost(`/admin/users/${user.id}/toggle-role`, {});
       fetchUsers();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "Failed to change user role.");
+      await alert({ title: "Error", message: err?.response?.data?.message || "Failed to change user role.", variant: "error" });
     } finally {
       setActionLoading(null);
     }
@@ -47,13 +55,19 @@ export default function AdminUsersPage() {
 
   const handleToggleBlock = async (user: User) => {
     const action = user.is_blocked ? "unblock" : "block";
-    if (!confirm(`Are you sure you want to ${action} ${user.name}?`)) return;
+    const ok = await confirm({
+      title: user.is_blocked ? "Unblock User?" : "Block User?",
+      message: `Are you sure you want to ${action} ${user.name}?`,
+      variant: "confirm",
+      confirmLabel: `Yes, ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+    });
+    if (!ok) return;
     setActionLoading(user.id);
     try {
       await apiPost(`/admin/users/${user.id}/toggle-block`, {});
       fetchUsers();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "Failed to update user status.");
+      await alert({ title: "Error", message: err?.response?.data?.message || "Failed to update user status.", variant: "error" });
     } finally {
       setActionLoading(null);
     }
@@ -61,6 +75,7 @@ export default function AdminUsersPage() {
 
   return (
     <div>
+      {Dialog}
       <div className="flex items-end justify-between mb-8">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-[#0A0A0A] uppercase">User Management</h1>

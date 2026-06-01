@@ -10,6 +10,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { ChevronRight } from "lucide-react";
+import { useDialog } from "@/components/ui/dialog-custom";
 
 const statusConfig: Record<
   Order["status"],
@@ -57,6 +58,7 @@ export default function OrderDetailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
+  const { confirm, alert, Dialog } = useDialog();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,28 +103,44 @@ export default function OrderDetailPage() {
   }
 
   async function handleCancelOrder() {
-    if (!order || !confirm("Are you sure you want to cancel this order?")) return;
+    if (!order) return;
+    const ok = await confirm({
+      title: "Cancel Order?",
+      message: "This action cannot be undone. Your order will be permanently cancelled.",
+      variant: "confirm",
+      confirmLabel: "Yes, Cancel Order",
+      cancelLabel: "Keep Order",
+    });
+    if (!ok) return;
 
     try {
       setIsCancelling(true);
       await apiPost(`/orders/${order.id}/cancel`);
       await fetchOrder();
     } catch (err) {
-      alert(getErrorMessage(err));
+      await alert({ title: "Error", message: getErrorMessage(err), variant: "error" });
     } finally {
       setIsCancelling(false);
     }
   }
 
   async function handleCompleteOrder() {
-    if (!order || !confirm("Have you received the package? This action cannot be undone.")) return;
+    if (!order) return;
+    const ok = await confirm({
+      title: "Confirm Receipt?",
+      message: "Have you received the package? Marking as complete cannot be undone.",
+      variant: "confirm",
+      confirmLabel: "Yes, I've Received It",
+      cancelLabel: "Not Yet",
+    });
+    if (!ok) return;
 
     try {
       setIsCompleting(true);
       await apiPost(`/orders/${order.id}/complete`);
       await fetchOrder();
     } catch (err) {
-      alert(getErrorMessage(err));
+      await alert({ title: "Error", message: getErrorMessage(err), variant: "error" });
     } finally {
       setIsCompleting(false);
     }
@@ -130,7 +148,7 @@ export default function OrderDetailPage() {
 
   function handlePayNow() {
     if (!order || !order.payment_token || !order.client_key) {
-      alert("Payment token or client key is missing. Please contact support.");
+      alert({ title: "Payment Error", message: "Payment token or client key is missing. Please contact support.", variant: "error" });
       return;
     }
 
@@ -141,7 +159,7 @@ export default function OrderDetailPage() {
       window.snap.pay(order.payment_token, {
         onSuccess: () => fetchOrder(),
         onPending: () => fetchOrder(),
-        onError: () => alert("Payment failed. Please try again."),
+        onError: () => alert({ title: "Payment Failed", message: "An error occurred during payment. Please try again.", variant: "error" }),
         onClose: () => {
           // user closed popup
         },
@@ -192,6 +210,7 @@ export default function OrderDetailPage() {
   return (
     <div className="min-h-screen bg-[#F2F0EB] py-24 md:py-32 relative">
       <Navbar />
+      {Dialog}
       {/* Grain texture overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15]"
         style={{

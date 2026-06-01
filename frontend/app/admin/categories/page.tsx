@@ -5,10 +5,12 @@ import { apiGet, apiPost, apiDelete, STORAGE_URL } from "@/lib/api";
 import { type PaginatedResponse, type Category } from "@/types";
 import { Plus, Edit, Trash2, X, Image as ImageIcon, Check } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { useDialog } from "@/components/ui/dialog-custom";
 
 export default function AdminCategoriesPage() {
   const [data, setData] = useState<PaginatedResponse<Category> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { confirm, alert, Dialog } = useDialog();
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,7 +60,7 @@ export default function AdminCategoriesPage() {
     e.preventDefault();
 
     if (imageFile && imageFile.size > 2 * 1024 * 1024) {
-      alert("Validation Error: Ukuran gambar tidak boleh lebih dari 2MB.");
+      await alert({ title: "Validation Error", message: "Ukuran gambar tidak boleh lebih dari 2MB.", variant: "error" });
       return;
     }
 
@@ -82,24 +84,31 @@ export default function AdminCategoriesPage() {
       handleCloseModal();
       fetchCategories(data?.current_page || 1);
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to save category");
+      await alert({ title: "Error", message: err.response?.data?.message || "Failed to save category", variant: "error" });
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if(!confirm("Are you sure you want to delete this category? Make sure no products are attached to it.")) return;
+    const ok = await confirm({
+      title: "Delete Category?",
+      message: "Are you sure? Make sure no products are attached to this category.",
+      variant: "confirm",
+      confirmLabel: "Yes, Delete",
+    });
+    if (!ok) return;
     try {
       await apiDelete(`/admin/categories/${id}`);
       fetchCategories(data?.current_page || 1);
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to delete category");
+      await alert({ title: "Error", message: err.response?.data?.message || "Failed to delete category", variant: "error" });
     }
   };
 
   return (
     <div>
+      {Dialog}
       {/* Header */}
       <div className="flex items-end justify-between mb-8">
         <div>

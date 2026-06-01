@@ -6,11 +6,13 @@ import { type Product, type Category, type ProductVariant, type ProductImage } f
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Image as ImageIcon, Plus, Trash2, Star, Check } from "lucide-react";
+import { useDialog } from "@/components/ui/dialog-custom";
 
 export default function EditProductPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
+  const { confirm, alert, Dialog } = useDialog();
   
   const [product, setProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -31,7 +33,7 @@ export default function EditProductPage() {
       setProduct(res);
     } catch (err) {
       console.error(err);
-      alert("Failed to load product");
+      await alert({ title: "Error", message: "Failed to load product.", variant: "error" });
       router.push("/admin/products");
     } finally {
       setIsLoading(false);
@@ -82,10 +84,10 @@ export default function EditProductPage() {
         is_featured: product.is_featured,
       };
       await apiPut(`/admin/products/${id}`, payload);
-      alert("Information updated successfully");
+      await alert({ title: "Saved!", message: "Product information updated successfully.", variant: "success" });
       fetchProduct();
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to update");
+      await alert({ title: "Error", message: err.response?.data?.message || "Failed to update", variant: "error" });
     } finally {
       setIsSavingInfo(false);
     }
@@ -99,19 +101,20 @@ export default function EditProductPage() {
       setNewVariant({ size: "M", color: "", stock: 0, additional_price: 0 });
       refreshNestedData();
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to add variant");
+      await alert({ title: "Error", message: err.response?.data?.message || "Failed to add variant", variant: "error" });
     } finally {
       setIsAddingVariant(false);
     }
   };
 
   const handleDeleteVariant = async (variantId: number) => {
-    if(!confirm("Delete this variant?")) return;
+    const ok = await confirm({ title: "Delete Variant?", message: "This variant and its stock will be permanently removed.", confirmLabel: "Yes, Delete" });
+    if (!ok) return;
     try {
       await apiDelete(`/admin/products/${id}/variants/${variantId}`);
       refreshNestedData();
     } catch (err) {
-      alert("Failed to delete variant");
+      await alert({ title: "Error", message: "Failed to delete variant", variant: "error" });
     }
   };
 
@@ -137,7 +140,7 @@ export default function EditProductPage() {
       if (!res.ok) throw new Error("Upload failed");
       refreshNestedData();
     } catch (err) {
-      alert("Failed to upload images");
+      await alert({ title: "Error", message: "Failed to upload images", variant: "error" });
     } finally {
       setIsUploading(false);
       if(fileInputRef.current) fileInputRef.current.value = '';
@@ -149,17 +152,18 @@ export default function EditProductPage() {
       await apiPut(`/admin/products/${id}/images/${imageId}/primary`, {});
       refreshNestedData();
     } catch (err) {
-      alert("Failed to set primary image");
+      await alert({ title: "Error", message: "Failed to set primary image", variant: "error" });
     }
   };
 
   const handleDeleteImage = async (imageId: number) => {
-    if(!confirm("Delete this image?")) return;
+    const ok = await confirm({ title: "Delete Image?", message: "This image will be permanently removed from the product.", confirmLabel: "Yes, Delete" });
+    if (!ok) return;
     try {
       await apiDelete(`/admin/products/${id}/images/${imageId}`);
       refreshNestedData();
     } catch (err) {
-      alert("Failed to delete image");
+      await alert({ title: "Error", message: "Failed to delete image", variant: "error" });
     }
   };
 
@@ -222,6 +226,7 @@ export default function EditProductPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
+      {Dialog}
       <div>
         <Link 
           href="/admin/products"

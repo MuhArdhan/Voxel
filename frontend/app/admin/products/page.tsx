@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { Search, Filter, Plus, Package, Edit, Trash2, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { CustomSelect } from "@/components/ui/CustomSelect";
+import { useDialog } from "@/components/ui/dialog-custom";
 
 export default function AdminProductsPage() {
   const [data, setData] = useState<PaginatedResponse<Product> | null>(null);
@@ -16,6 +17,7 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [page, setPage] = useState(1);
+  const { confirm, alert, Dialog } = useDialog();
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
@@ -52,27 +54,40 @@ export default function AdminProductsPage() {
   }, [fetchProducts]);
 
   const handleDelete = async (product: Product) => {
-    if (!confirm(`Are you sure you want to delete ${product.name}?`)) return;
+    const ok = await confirm({
+      title: "Delete Product?",
+      message: `"${product.name}" will be soft-deleted and hidden from the store.`,
+      variant: "confirm",
+      confirmLabel: "Yes, Delete",
+    });
+    if (!ok) return;
     try {
       await apiDelete(`/admin/products/${product.id}`);
       fetchProducts();
     } catch (err) {
-      alert("Failed to delete product.");
+      await alert({ title: "Error", message: "Failed to delete product.", variant: "error" });
     }
   };
 
   const handleRestore = async (product: Product) => {
-    if (!confirm(`Restore ${product.name}?`)) return;
+    const ok = await confirm({
+      title: "Restore Product?",
+      message: `"${product.name}" will be restored and visible in the store again.`,
+      variant: "confirm",
+      confirmLabel: "Yes, Restore",
+    });
+    if (!ok) return;
     try {
       await apiPost(`/admin/products/${product.id}/restore`, {});
       fetchProducts();
     } catch (err) {
-      alert("Failed to restore product.");
+      await alert({ title: "Error", message: "Failed to restore product.", variant: "error" });
     }
   };
 
   return (
     <div>
+      {Dialog}
       <div className="flex items-end justify-between mb-8">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-[#0A0A0A] uppercase">Product Catalog</h1>
