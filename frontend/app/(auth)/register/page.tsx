@@ -43,11 +43,11 @@ export default function RegisterPage() {
 
   const validateClient = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!form.name.trim()) newErrors.name = "Nama wajib diisi.";
-    if (!form.email.trim()) newErrors.email = "Email wajib diisi.";
-    if (form.password.length < 8) newErrors.password = "Password minimal 8 karakter.";
+    if (!form.name.trim()) newErrors.name = "Name is required.";
+    if (!form.email.trim()) newErrors.email = "Email is required.";
+    if (form.password.length < 8) newErrors.password = "Password must be at least 8 characters.";
     if (form.password !== form.password_confirmation)
-      newErrors.password_confirmation = "Konfirmasi password tidak cocok.";
+      newErrors.password_confirmation = "Passwords do not match.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -66,14 +66,14 @@ export default function RegisterPage() {
         password_confirmation: form.password_confirmation,
         phone: form.phone || undefined,
       });
-      toast.success("Akun berhasil dibuat. Selamat datang di VOXEL!");
+      toast.success("Account created successfully. Welcome to VOXEL!");
       router.push("/");
     } catch (err) {
       const validationErrors = getValidationErrors(err);
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
       } else {
-        toast.error(getErrorMessage(err, "Gagal membuat akun. Silakan coba lagi."));
+        toast.error(getErrorMessage(err, "Failed to create account. Please try again."));
       }
     } finally {
       setLoading(false);
@@ -178,7 +178,7 @@ export default function RegisterPage() {
               — Create Account
             </p>
             <h2 className="text-3xl font-black text-[#0A0A0A] tracking-tight">
-              Sign in now.
+              Create an account.
             </h2>
             <p className="text-sm text-[#8A8680]">
               Already have an account?{" "}
@@ -196,7 +196,7 @@ export default function RegisterPage() {
             {/* Name */}
             <div className="space-y-1.5">
               <Label htmlFor="name" className="mono text-[10px] font-semibold tracking-[0.15em] uppercase text-[#4A4845]">
-                Nama Lengkap
+                Full Name
               </Label>
               <div className="relative">
                 <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8680] pointer-events-none" />
@@ -226,7 +226,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="nama@example.com"
+                  placeholder="name@example.com"
                   autoComplete="email"
                   value={form.email}
                   onChange={handleChange}
@@ -240,8 +240,8 @@ export default function RegisterPage() {
             {/* Phone (optional) */}
             <div className="space-y-1.5">
               <Label htmlFor="phone" className="mono text-[10px] font-semibold tracking-[0.15em] uppercase text-[#4A4845]">
-                No. HP{" "}
-                <span className="normal-case text-[#8A8680] font-normal">(opsional)</span>
+                Phone Number{" "}
+                <span className="normal-case text-[#8A8680] font-normal">(optional)</span>
               </Label>
               <div className="relative">
                 <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8680] pointer-events-none" />
@@ -268,7 +268,7 @@ export default function RegisterPage() {
                   id="password"
                   name="password"
                   type={showPass ? "text" : "password"}
-                  placeholder="Min. 8 karakter"
+                  placeholder="Min. 8 characters"
                   autoComplete="new-password"
                   value={form.password}
                   onChange={handleChange}
@@ -290,14 +290,14 @@ export default function RegisterPage() {
             {/* Confirm Password */}
             <div className="space-y-1.5">
               <Label htmlFor="password_confirmation" className="mono text-[10px] font-semibold tracking-[0.15em] uppercase text-[#4A4845]">
-                Konfirmasi Password
+                Confirm Password
               </Label>
               <div className="relative">
                 <Input
                   id="password_confirmation"
                   name="password_confirmation"
                   type={showConfirm ? "text" : "password"}
-                  placeholder="Ulangi password"
+                  placeholder="Repeat password"
                   autoComplete="new-password"
                   value={form.password_confirmation}
                   onChange={handleChange}
@@ -341,11 +341,10 @@ export default function RegisterPage() {
             </Button>
 
             <p className="text-[10px] text-[#8A8680] text-center leading-relaxed">
-              Dengan mendaftar, Anda menyetujui{" "}
-              <span className="underline cursor-pointer hover:text-[#0A0A0A]">Syarat & Ketentuan</span>{" "}
-              dan{" "}
-              <span className="underline cursor-pointer hover:text-[#0A0A0A]">Kebijakan Privasi</span>{" "}
-              VOXEL.
+              By registering, you agree to VOXEL's{" "}
+              <span className="underline cursor-pointer hover:text-[#0A0A0A]">Terms & Conditions</span>{" "}
+              and{" "}
+              <span className="underline cursor-pointer hover:text-[#0A0A0A]">Privacy Policy</span>.
             </p>
           </form>
 

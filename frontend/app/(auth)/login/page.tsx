@@ -42,7 +42,7 @@ export default function LoginPage() {
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
       } else {
-        toast.error(getErrorMessage(err, "Email atau password salah."));
+        toast.error(getErrorMessage(err, "Invalid email or password."));
       }
     } finally {
       setLoading(false);
@@ -139,7 +139,7 @@ export default function LoginPage() {
               Welcome back.
             </h2>
             <p className="text-sm text-[#8A8680]">
-              Belum punya akun?{" "}
+              Don't have an account?{" "}
               <Link
                 href="/register"
                 className="text-[#0A0A0A] font-semibold underline underline-offset-4 hover:text-[#5C1A1A] transition-colors"
@@ -163,7 +163,7 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="nama@example.com"
+                placeholder="name@example.com"
                 autoComplete="email"
                 value={form.email}
                 onChange={handleChange}

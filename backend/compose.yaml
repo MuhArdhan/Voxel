@@ -1,0 +1,13 @@
+services:
+  server:
+    build:
+      context: .
+    ports:
+      - 8000:80
+    volumes:
+      # Sinkronisasi kode host dengan container untuk local development (hot-reload)
+      - .:/var/www/html
+      # Pertahankan direktori vendor dari dalam image agar tidak tertimpa oleh host
+      - /var/www/html/vendor
+    env_file:
+      - .env
