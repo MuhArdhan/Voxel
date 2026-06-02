@@ -21,7 +21,8 @@ return new class extends Migration
         if ($driver === 'mysql') {
             DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending_payment','pending','paid','processing','shipped','completed','cancelled') NOT NULL DEFAULT 'pending'");
         } elseif ($driver === 'pgsql') {
-            DB::statement("ALTER TYPE order_status ADD VALUE IF NOT EXISTS 'pending_payment'");
+            // Postgres automatically applies this from the initial migration creation now
+            // DB::statement("ALTER TYPE order_status ADD VALUE IF NOT EXISTS 'pending_payment'");
         }
         // SQLite: no action needed — CHECK constraint is bypassed for 'pending' initial status
     }

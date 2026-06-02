@@ -15,9 +15,10 @@ FROM php:8.2-apache as final
 # Install required extensions for Laravel
 RUN apt-get update && apt-get install -y \
     libzip-dev \
+    libpq-dev \
     zip \
     unzip \
-    && docker-php-ext-install zip pdo pdo_mysql \
+    && docker-php-ext-install zip pdo pdo_mysql pdo_pgsql \
     && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache mod_rewrite

@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->restrictOnDelete();
             $table->string('order_number')->unique();
-            $table->enum('status', ['pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending_payment', 'pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled'])->default('pending');
             $table->decimal('subtotal', 12, 2);
             $table->decimal('shipping_cost', 10, 2)->default(0);
             $table->decimal('total_price', 12, 2);
