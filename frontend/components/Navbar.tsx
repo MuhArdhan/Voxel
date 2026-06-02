@@ -29,6 +29,11 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { cart, setIsCartOpen } = useCart();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  
+  const handleSearchClick = () => {
+    router.push("/shop?focus=search");
+    setMenuOpen(false); // In case clicked from mobile menu
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -50,7 +55,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     setUserMenuOpen(false);
     await logout();
-    toast.success("Sampai jumpa!");
+    toast.success("See you later!");
     router.push("/");
   };
 
@@ -104,6 +109,7 @@ export default function Navbar() {
             <div className="flex items-center gap-4 pl-4 border-l border-[#C8C4BC]">
               <button
                 aria-label="Search"
+                onClick={handleSearchClick}
                 className="text-[#4A4845] hover:text-[#0A0A0A] transition-colors"
               >
                 <Search size={16} strokeWidth={1.5} />
@@ -158,7 +164,7 @@ export default function Navbar() {
                             className="flex items-center gap-3 px-4 py-2.5 text-[11px] text-[#4A4845] hover:bg-[#F2F0EB] hover:text-[#0A0A0A] transition-colors"
                           >
                             <Package size={13} />
-                            Pesanan Saya
+                            My Orders
                           </Link>
                           <Link
                             href="/account"
@@ -166,7 +172,7 @@ export default function Navbar() {
                             className="flex items-center gap-3 px-4 py-2.5 text-[11px] text-[#4A4845] hover:bg-[#F2F0EB] hover:text-[#0A0A0A] transition-colors"
                           >
                             <User size={13} />
-                            Profil
+                            Profile
                           </Link>
                         </div>
 
@@ -247,7 +253,15 @@ export default function Navbar() {
                 </motion.div>
               ))}
 
-              <div className="flex items-center gap-6 mt-auto pt-8 border-t border-[#C8C4BC]">
+              <div className="flex flex-col gap-6 mt-auto pt-8 border-t border-[#C8C4BC]">
+                <button 
+                  onClick={handleSearchClick} 
+                  className="flex items-center gap-3 text-sm text-[#4A4845]"
+                >
+                  <Search size={16} /> Search Shop
+                </button>
+
+                <div className="flex items-center gap-6">
                 {isLoggedIn ? (
                   <>
                     <Link
@@ -280,6 +294,7 @@ export default function Navbar() {
                 >
                   <ShoppingBag size={16} /> Cart
                 </Link>
+              </div>
               </div>
             </div>
           </motion.div>

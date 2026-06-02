@@ -8,37 +8,37 @@ import Link from "next/link";
 const lookbookImages = [
   {
     id: 1,
-    url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop",
+    url: "/images/lookbook/lookbook-1.png",
     caption: "CORE ESSENTIALS // 01",
     aspect: "aspect-[3/4]",
   },
   {
     id: 2,
-    url: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop",
+    url: "/images/lookbook/lookbook-2.png",
     caption: "URBAN CAMOUFLAGE",
     aspect: "aspect-[4/5]",
   },
   {
     id: 3,
-    url: "https://images.unsplash.com/photo-1550614000-4b95d4157120?q=80&w=1200&auto=format&fit=crop",
+    url: "/images/lookbook/lookbook-3.png",
     caption: "HEAVYWEIGHT COTTON",
     aspect: "aspect-square",
   },
   {
     id: 4,
-    url: "https://images.unsplash.com/photo-1509319117193-57bab727e09d?q=80&w=1200&auto=format&fit=crop",
+    url: "/images/lookbook/lookbook-4.png",
     caption: "STRUCTURAL HOOD // 01",
     aspect: "aspect-[3/5]",
   },
   {
     id: 5,
-    url: "https://images.unsplash.com/photo-1571513722275-4b41940f54b8?q=80&w=1200&auto=format&fit=crop",
+    url: "/images/lookbook/lookbook-5.png",
     caption: "SEASONAL OUTERWEAR",
     aspect: "aspect-[4/3]",
   },
   {
     id: 6,
-    url: "https://images.unsplash.com/photo-1618084705353-83ebce2ea7d0?q=80&w=1200&auto=format&fit=crop",
+    url: "/images/lookbook/lookbook-6.png",
     caption: "ANONYMITY SHIELD",
     aspect: "aspect-[3/4]",
   }

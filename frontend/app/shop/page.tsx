@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, ChevronRight } from "lucide-react";
@@ -39,6 +39,23 @@ function ShopContent() {
   const [searchInput, setSearchInput] = useState(initialFilters.search || "");
   const debouncedSearch = useDebounce(searchInput, 500);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus search if requested via URL
+  useEffect(() => {
+    if (searchParams.get("focus") === "search") {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+      
+      // Clean up the URL so it doesn't refocus on reload
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("focus");
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+      router.replace(newUrl, { scroll: false });
+    }
+  }, [searchParams, pathname, router]);
 
   const { products, isLoading, isLoadingMore, hasMore, total, loadMore } = useProducts(filters);
   const { categories } = useCategories();
@@ -108,6 +125,7 @@ function ShopContent() {
           <div className="relative flex-1 md:w-64">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8680]" />
             <Input
+              ref={searchInputRef}
               type="text"
               placeholder="Search products..."
               value={searchInput}

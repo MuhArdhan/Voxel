@@ -41,7 +41,7 @@ export default function AboutPage() {
           </div>
           
           <h1 className="text-5xl md:text-8xl lg:text-[10rem] font-black tracking-tighter leading-[0.85] uppercase">
-            Wearable <br /> Architecture.
+            Wear <br /> the Future.
           </h1>
         </motion.div>
       </section>
@@ -56,8 +56,8 @@ export default function AboutPage() {
           className="w-full h-full"
         >
           <img 
-            src="https://images.unsplash.com/photo-1618084705353-83ebce2ea7d0?q=80&w=2574&auto=format&fit=crop" 
-            alt="Voxel Aesthetic" 
+            src="/images/about/about-hero-voxel.png" 
+            alt="Voxel Headquarters" 
             className="w-full h-full object-cover opacity-80 mix-blend-luminosity"
           />
         </motion.div>
@@ -138,12 +138,12 @@ export default function AboutPage() {
             className="h-[50vh] md:h-[80vh] bg-[#C8C4BC] overflow-hidden rounded-xl"
           >
             <img 
-              src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop" 
-              alt="Fabric texture" 
+              src="/images/about/factory-process-1.png" 
+              alt="Manufacturing process" 
               className="w-full h-full object-cover grayscale mix-blend-multiply opacity-80"
             />
           </motion.div>
-          <div className="flex flex-col gap-6 md:gap-8">
+          <div className="flex flex-col gap-6">
             <motion.div 
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -151,7 +151,7 @@ export default function AboutPage() {
               className="h-[25vh] md:h-[40vh] bg-[#C8C4BC] overflow-hidden rounded-xl"
             >
               <img 
-                src="https://images.unsplash.com/photo-1558222218-b7b54eede3f3?q=80&w=2574&auto=format&fit=crop" 
+                src="/images/about/factory-process-2.png" 
                 alt="Hardware detail" 
                 className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
               />

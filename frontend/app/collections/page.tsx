@@ -10,7 +10,7 @@ const collections = [
     id: "01",
     title: "SEASON 01: THE VOID",
     subtitle: "Structural outerwear designed for anonymity.",
-    image: "https://images.unsplash.com/photo-1578932750294-f5075e85f44a?q=80&w=2574&auto=format&fit=crop",
+    image: "/images/collections/collection-1.png",
     link: "/shop?category=outerwear",
     color: "bg-[#0A0A0A]",
     textColor: "text-[#F2F0EB]"
@@ -19,7 +19,7 @@ const collections = [
     id: "02",
     title: "CORE ESSENTIALS",
     subtitle: "Heavyweight cottons. Permanent utility.",
-    image: "https://images.unsplash.com/photo-1523398002811-999aa8d9512e?q=80&w=2670&auto=format&fit=crop",
+    image: "/images/collections/collection-2.png",
     link: "/shop?category=apparel",
     color: "bg-[#E8E5DF]",
     textColor: "text-[#0A0A0A]"
@@ -28,7 +28,7 @@ const collections = [
     id: "03",
     title: "ARCHIVE // PROTOTYPES",
     subtitle: "Experimental silhouettes and limited runs.",
-    image: "https://images.unsplash.com/photo-1618084705353-83ebce2ea7d0?q=80&w=2574&auto=format&fit=crop",
+    image: "/images/collections/collection-3.png",
     link: "/shop?limited=true",
     color: "bg-[#C8C4BC]",
     textColor: "text-[#0A0A0A]"
@@ -69,11 +69,11 @@ export default function CollectionsPage() {
               className="group relative flex flex-col md:flex-row items-center gap-8 md:gap-16"
             >
               {/* Image Block */}
-              <div className={`w-full md:w-3/5 h-[60vh] md:h-[80vh] relative overflow-hidden rounded-2xl ${collection.color}`}>
+              <div className={`w-full md:w-1/2 aspect-square relative overflow-hidden rounded-2xl ${collection.color}`}>
                 <img 
                   src={collection.image} 
                   alt={collection.title}
-                  className="w-full h-full object-cover grayscale mix-blend-multiply opacity-80 group-hover:scale-105 group-hover:grayscale-0 transition-all duration-1000 ease-out"
+                  className="w-full h-full object-cover grayscale opacity-90 group-hover:scale-105 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 ease-out"
                 />
                 
                 {/* ID Badge overlay on image */}
@@ -83,7 +83,7 @@ export default function CollectionsPage() {
               </div>
 
               {/* Text Block */}
-              <div className="w-full md:w-2/5 flex flex-col justify-center">
+              <div className="w-full md:flex-1 flex flex-col justify-center">
                 <div className="mono text-xs text-[#8A8680] mb-4 tracking-[0.2em]">
                   {collection.id} //
                 </div>
