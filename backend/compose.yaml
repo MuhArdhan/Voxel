@@ -2,6 +2,8 @@ services:
   server:
     build:
       context: .
+      args:
+        COMPOSER_FLAGS: ""
     ports:
       - 8000:80
     volumes:

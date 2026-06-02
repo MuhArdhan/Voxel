@@ -31,5 +31,8 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/vendor
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
+public/storage
 LICENSE
 README.md
