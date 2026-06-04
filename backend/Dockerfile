@@ -5,6 +5,7 @@ FROM composer:lts as deps
 WORKDIR /app
 
 ARG COMPOSER_FLAGS="--no-dev"
+ARG CACHEBUST=2
 RUN --mount=type=bind,source=composer.json,target=composer.json \
     --mount=type=bind,source=composer.lock,target=composer.lock \
     --mount=type=cache,target=/tmp/cache \

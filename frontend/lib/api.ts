@@ -3,7 +3,7 @@ import { getToken, getSessionId } from "@/lib/auth";
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
 export const API_BASE_URL = `${BACKEND_URL}/api`;
-export const STORAGE_URL = `${BACKEND_URL}/storage`;
+export const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL ?? `${BACKEND_URL}/storage`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

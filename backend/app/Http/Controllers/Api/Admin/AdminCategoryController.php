@@ -25,7 +25,7 @@ class AdminCategoryController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('categories', 'public');
+            $validated['image'] = $request->file('image')->store('categories');
         }
 
         $category = Category::create($validated);
@@ -48,7 +48,7 @@ class AdminCategoryController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('categories', 'public');
+            $validated['image'] = $request->file('image')->store('categories');
         }
 
         $category->update($validated);

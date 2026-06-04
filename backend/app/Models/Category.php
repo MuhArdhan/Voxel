@@ -23,6 +23,13 @@ class Category extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? \Illuminate\Support\Facades\Storage::url($this->image) : null;
+    }
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()

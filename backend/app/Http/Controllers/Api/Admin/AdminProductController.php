@@ -70,7 +70,7 @@ class AdminProductController extends Controller
             if ($request->hasFile('images')) {
                 $primaryIndex = $validated['primary_image_index'] ?? 0;
                 foreach ($request->file('images') as $index => $image) {
-                    $path = $image->store('products', 'public');
+                    $path = $image->store('products');
                     $product->images()->create([
                         'image_path' => $path,
                         'is_primary' => $index === (int) $primaryIndex,
@@ -181,7 +181,7 @@ class AdminProductController extends Controller
         $nextOrder = $product->images()->max('sort_order') + 1;
 
         foreach ($request->file('images') as $index => $image) {
-            $path = $image->store('products', 'public');
+            $path = $image->store('products');
             $uploaded[] = $product->images()->create([
                 'image_path' => $path,
                 'is_primary' => false,

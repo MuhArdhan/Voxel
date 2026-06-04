@@ -24,8 +24,10 @@ class ProductImage extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function getImageUrlAttribute(): string
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute(): ?string
     {
-        return asset('storage/' . $this->image_path);
+        return $this->image_path ? \Illuminate\Support\Facades\Storage::url($this->image_path) : null;
     }
 }
