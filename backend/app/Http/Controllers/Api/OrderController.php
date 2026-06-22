@@ -148,7 +148,8 @@ class OrderController extends Controller
         try {
             [$order, $snapData] = DB::transaction(function () use ($cart, $validated, $request) {
                 $subtotal     = $cart->total;
-                $shippingCost = $validated['shipping_cost'];
+                $isFreeShipping = $subtotal >= 1000000;
+                $shippingCost = $isFreeShipping ? 0 : $validated['shipping_cost'];
                 $totalPrice   = $subtotal + $shippingCost;
 
                 $order = Order::create([

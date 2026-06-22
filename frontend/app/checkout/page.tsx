@@ -260,7 +260,7 @@ export default function CheckoutPage() {
         ...values,
         courier: selectedCourier,
         courier_service: selectedService.courier_service_code,
-        shipping_cost: selectedService.price,
+        shipping_cost: shippingCost,
         selected_payment_method: method,
       };
       const res = await apiPost<any>("/orders/checkout", payload);
@@ -339,7 +339,9 @@ export default function CheckoutPage() {
   }
 
   const subtotal = Number(cart.total);
-  const total    = subtotal + (selectedService?.price || 0);
+  const isFreeShipping = subtotal >= 1000000;
+  const shippingCost = isFreeShipping ? 0 : (selectedService?.price || 0);
+  const total    = subtotal + shippingCost;
 
   // Group rates by courier for Step 2 UI
   const couriersList = dynamicRates.reduce((acc: any[], rate: any) => {
@@ -734,7 +736,9 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-[#8A8680]">
                   <span>Shipping</span>
                   <span className="mono text-[#F2F0EB]">
-                    {step > 1 && selectedService ? formatPrice(selectedService.price) : "—"}
+                    {step > 1 && selectedService 
+                      ? (isFreeShipping ? <span className="text-[#00D4FF] font-bold">FREE</span> : formatPrice(shippingCost)) 
+                      : "—"}
                   </span>
                 </div>
               </div>
