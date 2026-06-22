@@ -73,15 +73,17 @@ class MidtransService
      */
     public function parseNotification(): array
     {
+        $body = file_get_contents('php://input');
+        $payload = json_decode($body, true);
+
         $notif = new \Midtrans\Notification();
 
         // Signature Validation
+        $orderId           = $payload['order_id'] ?? $notif->order_id;
+        $statusCode        = $payload['status_code'] ?? $notif->status_code;
+        $grossAmount       = $payload['gross_amount'] ?? $notif->gross_amount;
+        $incomingSignature = $payload['signature_key'] ?? $notif->signature_key;
         $serverKey         = config('midtrans.server_key');
-        $orderId           = $notif->order_id;
-        $statusCode        = $notif->status_code;
-        $grossAmount       = $notif->gross_amount;
-        $incomingSignature = $notif->signature_key;
-
         $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
 
         if ($incomingSignature !== $expectedSignature) {
@@ -89,12 +91,12 @@ class MidtransService
         }
 
         return [
-            'order_number'       => $notif->order_id,
-            'transaction_status' => $notif->transaction_status,
-            'fraud_status'       => $notif->fraud_status ?? null,
-            'payment_type'       => $notif->payment_type,
-            'transaction_id'     => $notif->transaction_id,
-            'gross_amount'       => $notif->gross_amount,
+            'order_number'       => $orderId,
+            'transaction_status' => $payload['transaction_status'] ?? $notif->transaction_status,
+            'fraud_status'       => $payload['fraud_status'] ?? $notif->fraud_status ?? null,
+            'payment_type'       => $payload['payment_type'] ?? $notif->payment_type,
+            'transaction_id'     => $payload['transaction_id'] ?? $notif->transaction_id,
+            'gross_amount'       => $grossAmount,
         ];
     }
 
