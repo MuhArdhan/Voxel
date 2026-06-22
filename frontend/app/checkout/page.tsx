@@ -101,6 +101,7 @@ export default function CheckoutPage() {
   const [snapReady,       setSnapReady]       = useState(false);
   const [activePaymentGroup, setActivePaymentGroup] = useState<string | null>(null);
   const [isPaymentOpen,   setIsPaymentOpen]   = useState(false);
+  const [showPaymentLoading, setShowPaymentLoading] = useState(false);
 
   const orderIdRef     = useRef<number | null>(null);
   const embedDone      = useRef(false);
@@ -251,6 +252,7 @@ export default function CheckoutPage() {
 
   const createOrderAndPay = async (method?: string) => {
     setSubmitting(true);
+    setShowPaymentLoading(true);
     setError(null);
     try {
       const values = form.getValues();
@@ -266,6 +268,7 @@ export default function CheckoutPage() {
       
       const proceed = () => {
         if (window.snap && res.snap_token) {
+          setShowPaymentLoading(false);
           window.snap.pay(res.snap_token, {
             onSuccess: async () => {
               setDone(true);
@@ -307,6 +310,7 @@ export default function CheckoutPage() {
     } catch (e: any) {
       setError(e.response?.data?.message || "An error occurred. Please try again.");
       setSubmitting(false);
+      setShowPaymentLoading(false);
     }
   };
 
@@ -742,6 +746,34 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Payment Loading Overlay */}
+      <AnimatePresence>
+        {showPaymentLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A0A0A]/60 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-[#F2F0EB] p-8 rounded-3xl flex flex-col items-center justify-center max-w-sm w-full mx-4 shadow-2xl border border-[#C8C4BC]"
+            >
+              <div className="relative mb-6 mt-2">
+                <div className="absolute inset-0 bg-[#0A0A0A] blur-xl opacity-20 rounded-full animate-pulse" />
+                <Loader2 className="w-16 h-16 text-[#0A0A0A] animate-spin relative z-10" />
+              </div>
+              <h3 className="text-xl font-black text-[#0A0A0A] mb-2 text-center uppercase tracking-wider">Secure Checkout</h3>
+              <p className="text-sm text-[#4A4845] text-center leading-relaxed">
+                Please wait while we connect you to our secure payment gateway...
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
