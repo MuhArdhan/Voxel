@@ -12,6 +12,7 @@ import {
   Truck,
   RotateCcw,
   Package,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { apiGet, STORAGE_URL } from "@/lib/api";
@@ -54,6 +55,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [addedFlash, setAddedFlash] = useState(false);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -355,7 +357,10 @@ export default function ProductDetailPage() {
                       <span className="ml-2 text-[#0A0A0A]">— {selectedSize}</span>
                     )}
                   </span>
-                  <button className="mono text-[9px] tracking-[0.1em] uppercase text-[#8A8680] hover:text-[#0A0A0A] transition-colors underline underline-offset-4">
+                  <button 
+                    onClick={() => setIsSizeGuideOpen(true)}
+                    className="mono text-[9px] tracking-[0.1em] uppercase text-[#8A8680] hover:text-[#0A0A0A] transition-colors underline underline-offset-4"
+                  >
                     Size Guide
                   </button>
                 </div>
@@ -512,6 +517,108 @@ export default function ProductDetailPage() {
       {/* Related Products */}
       <RelatedProducts categorySlug={product.category.slug} currentSlug={product.slug} />
 
+      {/* Size Guide Modal */}
+      <AnimatePresence>
+        {isSizeGuideOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0A0A]/60 backdrop-blur-sm"
+            onClick={() => setIsSizeGuideOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl bg-[#F2F0EB] rounded-3xl shadow-2xl overflow-hidden border border-[#C8C4BC]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-[#C8C4BC]">
+                <div>
+                  <h3 className="text-xl font-black text-[#0A0A0A]">Size Guide</h3>
+                  <p className="text-xs text-[#8A8680] mt-1">Measurement in centimeters (cm)</p>
+                </div>
+                <button
+                  onClick={() => setIsSizeGuideOpen(false)}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-[#E8E5DF] hover:bg-[#D4D0C8] text-[#0A0A0A] transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <div className="overflow-x-auto rounded-2xl border border-[#C8C4BC] bg-white">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-[#E8E5DF] text-[#4A4845] mono text-[10px] tracking-[0.1em] uppercase">
+                      <tr>
+                        <th className="px-6 py-4 font-bold border-b border-[#C8C4BC]">Size</th>
+                        <th className="px-6 py-4 font-bold border-b border-[#C8C4BC]">Chest</th>
+                        <th className="px-6 py-4 font-bold border-b border-[#C8C4BC]">Length</th>
+                        <th className="px-6 py-4 font-bold border-b border-[#C8C4BC]">Shoulder</th>
+                        <th className="px-6 py-4 font-bold border-b border-[#C8C4BC]">Sleeve</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#C8C4BC] text-[#0A0A0A]">
+                      <tr className="hover:bg-[#F9F8F6] transition-colors">
+                        <td className="px-6 py-4 font-black">XS</td>
+                        <td className="px-6 py-4">44</td>
+                        <td className="px-6 py-4">66</td>
+                        <td className="px-6 py-4">40</td>
+                        <td className="px-6 py-4">19</td>
+                      </tr>
+                      <tr className="hover:bg-[#F9F8F6] transition-colors">
+                        <td className="px-6 py-4 font-black">S</td>
+                        <td className="px-6 py-4">48</td>
+                        <td className="px-6 py-4">68</td>
+                        <td className="px-6 py-4">42</td>
+                        <td className="px-6 py-4">20</td>
+                      </tr>
+                      <tr className="hover:bg-[#F9F8F6] transition-colors">
+                        <td className="px-6 py-4 font-black">M</td>
+                        <td className="px-6 py-4">52</td>
+                        <td className="px-6 py-4">70</td>
+                        <td className="px-6 py-4">44</td>
+                        <td className="px-6 py-4">21</td>
+                      </tr>
+                      <tr className="hover:bg-[#F9F8F6] transition-colors">
+                        <td className="px-6 py-4 font-black">L</td>
+                        <td className="px-6 py-4">56</td>
+                        <td className="px-6 py-4">72</td>
+                        <td className="px-6 py-4">46</td>
+                        <td className="px-6 py-4">22</td>
+                      </tr>
+                      <tr className="hover:bg-[#F9F8F6] transition-colors">
+                        <td className="px-6 py-4 font-black">XL</td>
+                        <td className="px-6 py-4">60</td>
+                        <td className="px-6 py-4">74</td>
+                        <td className="px-6 py-4">48</td>
+                        <td className="px-6 py-4">23</td>
+                      </tr>
+                      <tr className="hover:bg-[#F9F8F6] transition-colors">
+                        <td className="px-6 py-4 font-black">XXL</td>
+                        <td className="px-6 py-4">64</td>
+                        <td className="px-6 py-4">76</td>
+                        <td className="px-6 py-4">50</td>
+                        <td className="px-6 py-4">24</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mt-6 bg-[#E8E5DF] p-4 rounded-2xl flex gap-3 items-start">
+                  <AlertCircle size={18} className="text-[#8A8680] shrink-0 mt-0.5" />
+                  <p className="text-xs text-[#4A4845] leading-relaxed">
+                    <strong>Note:</strong> Measurements may vary by 1-2cm due to manual measurement. For the best fit, we recommend measuring a similar garment you already own.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
