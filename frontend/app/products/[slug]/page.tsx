@@ -56,6 +56,16 @@ export default function ProductDetailPage() {
   const [addedFlash, setAddedFlash] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sizeParam = urlParams.get("size");
+      if (sizeParam) {
+        setSelectedSize(sizeParam);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     async function fetchProduct() {
       try {
         const res = await apiGet<Product>(`/products/slug/${slug}`);
@@ -86,7 +96,7 @@ export default function ProductDetailPage() {
       return; 
     }
     if (quantity > availableStock) { 
-      toast.error("Stok tidak mencukupi."); 
+      toast.error("Insufficient stock."); 
       return; 
     }
     
@@ -409,8 +419,8 @@ export default function ProductDetailPage() {
                           }`}
                         >
                           {availableStock < 5
-                            ? `HANYA ${availableStock} TERSISA`
-                            : `${availableStock} unit tersedia`}
+                            ? `ONLY ${availableStock} LEFT`
+                            : `${availableStock} units available`}
                         </span>
                       </div>
                     </motion.div>
@@ -478,7 +488,7 @@ export default function ProductDetailPage() {
               {/* Trust badges */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { icon: <Truck size={14} />, label: "Free Shipping", sub: "Pembelian > Rp1jt", color: "#00D4FF" },
+                  { icon: <Truck size={14} />, label: "Free Shipping", sub: "Orders > Rp1M", color: "#00D4FF" },
                   { icon: <Package size={14} />, label: "100% Authentic", sub: "Cyber-tech apparel", color: "#8B5CF6" },
                   { icon: <RotateCcw size={14} />, label: "14-Day Return", sub: "Easy return policy", color: "#5C1A1A" },
                 ].map((badge) => (

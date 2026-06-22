@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ShoppingBag, Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { STORAGE_URL } from "@/lib/api";
 
 interface Product {
@@ -34,6 +34,7 @@ function formatPrice(price: number): string {
 }
 
 export default function ProductCard({ product, index = 0, size = "default" }: ProductCardProps) {
+  const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const availableSizes = product.variants
     .filter((v) => v.stock > 0)
@@ -112,21 +113,8 @@ export default function ProductCard({ product, index = 0, size = "default" }: Pr
           <motion.div
             animate={{ opacity: hovered ? 1 : 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 bg-[#0A0A0A]/20 flex items-center justify-center gap-3"
-          >
-            <button
-              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors"
-              onClick={(e) => e.preventDefault()}
-            >
-              <Eye size={14} className="text-[#0A0A0A]" />
-            </button>
-            <button
-              className="w-10 h-10 rounded-full bg-[#0A0A0A]/90 backdrop-blur-sm flex items-center justify-center hover:bg-[#0A0A0A] transition-colors"
-              onClick={(e) => e.preventDefault()}
-            >
-              <ShoppingBag size={14} className="text-white" />
-            </button>
-          </motion.div>
+            className="absolute inset-0 bg-[#0A0A0A]/20"
+          />
 
           {/* Size quick-pick (visible on hover) */}
           <motion.div
@@ -138,7 +126,10 @@ export default function ProductCard({ product, index = 0, size = "default" }: Pr
               <button
                 key={size}
                 className="flex-1 py-1 bg-white/90 backdrop-blur-sm text-[#0A0A0A] text-[9px] font-bold rounded hover:bg-[#0A0A0A] hover:text-white transition-colors"
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(`/products/${product.slug}?size=${size}`);
+                }}
               >
                 {size}
               </button>
